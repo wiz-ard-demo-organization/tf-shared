@@ -1,3 +1,4 @@
+# Module for creating and configuring Azure Load Balancer resources with support for multiple frontend IPs, backend pools, health probes, and various load balancing rules
 terraform {
   required_providers {
     azurerm = {
@@ -7,6 +8,7 @@ terraform {
   }
 }
 
+# Create the main Azure Load Balancer resource with specified SKU and frontend IP configurations
 resource "azurerm_lb" "this" {
   name                = var.load_balancer.name
   location            = var.load_balancer.location
@@ -15,6 +17,7 @@ resource "azurerm_lb" "this" {
   sku_tier            = var.load_balancer.sku_tier
   edge_zone           = var.load_balancer.edge_zone
 
+  # Configure frontend IP configurations for receiving incoming traffic
   dynamic "frontend_ip_configuration" {
     for_each = var.load_balancer.frontend_ip_configuration
     content {
@@ -33,13 +36,14 @@ resource "azurerm_lb" "this" {
   tags = var.tags
 }
 
-# Backend Address Pools
+# Backend Address Pools - Define groups of backend resources that will receive load-balanced traffic
 resource "azurerm_lb_backend_address_pool" "this" {
   for_each = var.backend_address_pools
 
   name            = each.value.name
   loadbalancer_id = azurerm_lb.this.id
 
+  # Optional tunnel interface configuration for Gateway Load Balancer scenarios
   dynamic "tunnel_interface" {
     for_each = each.value.tunnel_interface != null ? each.value.tunnel_interface : []
     content {
@@ -51,7 +55,7 @@ resource "azurerm_lb_backend_address_pool" "this" {
   }
 }
 
-# Backend Address Pool Addresses
+# Backend Address Pool Addresses - Specify individual backend IP addresses within the backend pools
 resource "azurerm_lb_backend_address_pool_address" "this" {
   for_each = var.backend_address_pool_addresses
 
@@ -60,6 +64,7 @@ resource "azurerm_lb_backend_address_pool_address" "this" {
   virtual_network_id      = each.value.virtual_network_id
   ip_address              = each.value.ip_address
 
+  # Optional port mapping configuration for inbound NAT rules
   dynamic "inbound_nat_rule_port_mapping" {
     for_each = each.value.inbound_nat_rule_port_mapping != null ? each.value.inbound_nat_rule_port_mapping : []
     content {
@@ -70,7 +75,7 @@ resource "azurerm_lb_backend_address_pool_address" "this" {
   }
 }
 
-# Health Probes
+# Health Probes - Monitor backend pool member health to ensure traffic is only sent to healthy instances
 resource "azurerm_lb_probe" "this" {
   for_each = var.health_probes
 
@@ -84,7 +89,7 @@ resource "azurerm_lb_probe" "this" {
   number_of_probes    = each.value.number_of_probes
 }
 
-# Load Balancing Rules
+# Load Balancing Rules - Define how traffic is distributed from frontend to backend pools
 resource "azurerm_lb_rule" "this" {
   for_each = var.load_balancing_rules
 
@@ -103,7 +108,7 @@ resource "azurerm_lb_rule" "this" {
   enable_tcp_reset               = each.value.enable_tcp_reset
 }
 
-# NAT Rules
+# NAT Rules - Configure inbound NAT rules for direct connectivity to specific backend instances
 resource "azurerm_lb_nat_rule" "this" {
   for_each = var.nat_rules
 
@@ -119,7 +124,7 @@ resource "azurerm_lb_nat_rule" "this" {
   enable_tcp_reset               = each.value.enable_tcp_reset
 }
 
-# Outbound Rules
+# Outbound Rules - Configure SNAT rules for outbound connectivity from backend pools
 resource "azurerm_lb_outbound_rule" "this" {
   for_each = var.outbound_rules
 
@@ -131,6 +136,7 @@ resource "azurerm_lb_outbound_rule" "this" {
   idle_timeout_in_minutes  = each.value.idle_timeout_in_minutes
   enable_tcp_reset         = each.value.enable_tcp_reset
 
+  # Specify which frontend IPs to use for outbound connections
   dynamic "frontend_ip_configuration" {
     for_each = each.value.frontend_ip_configuration_names
     content {
@@ -139,7 +145,7 @@ resource "azurerm_lb_outbound_rule" "this" {
   }
 }
 
-# NAT Pool (for Virtual Machine Scale Sets)
+# NAT Pool - Configure NAT pools for Virtual Machine Scale Sets to enable inbound connectivity
 resource "azurerm_lb_nat_pool" "this" {
   for_each = var.nat_pools
 

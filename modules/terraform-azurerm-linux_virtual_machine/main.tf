@@ -1,3 +1,4 @@
+# Module for creating and managing Azure Linux Virtual Machines with associated network interfaces, public IPs, and security configurations
 terraform {
   required_providers {
     azurerm = {
@@ -7,6 +8,7 @@ terraform {
   }
 }
 
+# Create optional public IP for the virtual machine if external access is required
 resource "azurerm_public_ip" "this" {
   count = var.linux_virtual_machine.create_public_ip ? 1 : 0
 
@@ -23,11 +25,13 @@ resource "azurerm_public_ip" "this" {
   tags = var.tags
 }
 
+# Create network interface for the virtual machine with IP configurations
 resource "azurerm_network_interface" "this" {
   name                = var.network_interface.name
   location            = var.linux_virtual_machine.location
   resource_group_name = var.linux_virtual_machine.resource_group_name
 
+  # Configure IP settings for the network interface
   dynamic "ip_configuration" {
     for_each = var.network_interface.ip_configuration
     content {
@@ -43,6 +47,7 @@ resource "azurerm_network_interface" "this" {
   tags = var.tags
 }
 
+# Associate network security group with the network interface for firewall rules
 resource "azurerm_network_interface_security_group_association" "this" {
   count = var.network_security_group_id != null ? 1 : 0
 
@@ -50,6 +55,7 @@ resource "azurerm_network_interface_security_group_association" "this" {
   network_security_group_id = var.network_security_group_id
 }
 
+# Create the Linux Virtual Machine with specified configuration
 resource "azurerm_linux_virtual_machine" "this" {
   name                = var.linux_virtual_machine.name
   location            = var.linux_virtual_machine.location
@@ -57,13 +63,14 @@ resource "azurerm_linux_virtual_machine" "this" {
   size                = var.linux_virtual_machine.size
   admin_username      = var.linux_virtual_machine.admin_username
 
-  # Network
+  # Network configuration
   network_interface_ids = [azurerm_network_interface.this.id]
 
-  # Authentication
+  # Authentication configuration
   disable_password_authentication = var.linux_virtual_machine.disable_password_authentication
   admin_password                  = var.linux_virtual_machine.admin_password
 
+  # SSH key configuration for secure access
   dynamic "admin_ssh_key" {
     for_each = var.linux_virtual_machine.admin_ssh_key != null ? [var.linux_virtual_machine.admin_ssh_key] : []
     content {
@@ -72,13 +79,14 @@ resource "azurerm_linux_virtual_machine" "this" {
     }
   }
 
-  # OS Disk
+  # OS Disk configuration for the virtual machine
   os_disk {
     name                 = var.linux_virtual_machine.os_disk.name
     caching              = var.linux_virtual_machine.os_disk.caching
     storage_account_type = var.linux_virtual_machine.os_disk.storage_account_type
     disk_size_gb         = var.linux_virtual_machine.os_disk.disk_size_gb
 
+    # Ephemeral disk settings for improved performance
     dynamic "diff_disk_settings" {
       for_each = var.linux_virtual_machine.os_disk.diff_disk_settings != null ? [var.linux_virtual_machine.os_disk.diff_disk_settings] : []
       content {
@@ -88,7 +96,7 @@ resource "azurerm_linux_virtual_machine" "this" {
     }
   }
 
-  # Source Image
+  # Source image configuration from Azure Marketplace
   dynamic "source_image_reference" {
     for_each = var.linux_virtual_machine.source_image_reference != null ? [var.linux_virtual_machine.source_image_reference] : []
     content {
@@ -99,9 +107,10 @@ resource "azurerm_linux_virtual_machine" "this" {
     }
   }
 
+  # Custom image ID if using a custom image
   source_image_id = var.linux_virtual_machine.source_image_id
 
-  # Boot Diagnostics
+  # Boot diagnostics configuration for troubleshooting
   dynamic "boot_diagnostics" {
     for_each = var.linux_virtual_machine.boot_diagnostics != null ? [var.linux_virtual_machine.boot_diagnostics] : []
     content {
@@ -109,7 +118,7 @@ resource "azurerm_linux_virtual_machine" "this" {
     }
   }
 
-  # Additional Disks
+  # Additional capabilities like Ultra SSD support
   dynamic "additional_capabilities" {
     for_each = var.linux_virtual_machine.additional_capabilities != null ? [var.linux_virtual_machine.additional_capabilities] : []
     content {
@@ -117,7 +126,7 @@ resource "azurerm_linux_virtual_machine" "this" {
     }
   }
 
-  # Identity
+  # Managed identity configuration for Azure resource access
   dynamic "identity" {
     for_each = var.linux_virtual_machine.identity != null ? [var.linux_virtual_machine.identity] : []
     content {
@@ -126,7 +135,7 @@ resource "azurerm_linux_virtual_machine" "this" {
     }
   }
 
-  # Plan
+  # Marketplace image plan information
   dynamic "plan" {
     for_each = var.linux_virtual_machine.plan != null ? [var.linux_virtual_machine.plan] : []
     content {
@@ -136,14 +145,14 @@ resource "azurerm_linux_virtual_machine" "this" {
     }
   }
 
-  # Custom Data
+  # Custom data for cloud-init or other initialization scripts
   custom_data = var.linux_virtual_machine.custom_data
 
-  # VM Agent
+  # VM Agent configuration
   provision_vm_agent         = var.linux_virtual_machine.provision_vm_agent
   allow_extension_operations = var.linux_virtual_machine.allow_extension_operations
 
-  # Availability
+  # Availability and placement configuration
   availability_set_id                 = var.linux_virtual_machine.availability_set_id
   proximity_placement_group_id        = var.linux_virtual_machine.proximity_placement_group_id
   virtual_machine_scale_set_id        = var.linux_virtual_machine.virtual_machine_scale_set_id

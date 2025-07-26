@@ -1,3 +1,4 @@
+# Module for creating and managing Azure Virtual Networks with associated subnets and network configurations
 terraform {
   required_providers {
     azurerm = {
@@ -7,6 +8,7 @@ terraform {
   }
 }
 
+# Create the main Azure Virtual Network resource with specified address space and optional DDoS protection
 resource "azurerm_virtual_network" "this" {
   name                = var.virtual_network.name
   location            = var.virtual_network.location
@@ -16,6 +18,7 @@ resource "azurerm_virtual_network" "this" {
   edge_zone           = var.virtual_network.edge_zone
   flow_timeout_in_minutes = var.virtual_network.flow_timeout_in_minutes
 
+  # Configure DDoS protection plan for enhanced network security
   dynamic "ddos_protection_plan" {
     for_each = var.virtual_network.ddos_protection_plan != null ? [var.virtual_network.ddos_protection_plan] : []
     content {
@@ -24,6 +27,7 @@ resource "azurerm_virtual_network" "this" {
     }
   }
 
+  # Configure encryption enforcement for network traffic
   dynamic "encryption" {
     for_each = var.virtual_network.encryption != null ? [var.virtual_network.encryption] : []
     content {
@@ -34,6 +38,7 @@ resource "azurerm_virtual_network" "this" {
   tags = var.tags
 }
 
+# Create subnets within the virtual network with specified configurations for service endpoints and delegations
 resource "azurerm_subnet" "this" {
   for_each = var.subnets
 
@@ -46,6 +51,7 @@ resource "azurerm_subnet" "this" {
   service_endpoints                             = each.value.service_endpoints
   service_endpoint_policy_ids                   = each.value.service_endpoint_policy_ids
 
+  # Configure subnet delegation for specific Azure services
   dynamic "delegation" {
     for_each = each.value.delegation != null ? [each.value.delegation] : []
     content {

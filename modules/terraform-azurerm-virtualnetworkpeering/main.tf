@@ -1,3 +1,4 @@
+# Module for establishing virtual network peering connections between Azure VNets for secure network connectivity
 terraform {
   required_providers {
     azurerm = {
@@ -7,6 +8,7 @@ terraform {
   }
 }
 
+# Create virtual network peering to enable communication between VNets
 resource "azurerm_virtual_network_peering" "this" {
   name                         = var.peering.name
   resource_group_name          = var.peering.resource_group_name
