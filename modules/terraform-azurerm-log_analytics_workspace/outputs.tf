@@ -1,3 +1,4 @@
+# Outputs for the Azure Log Analytics Workspace module - exposes workspace details, solutions, and query configurations
 output "log_analytics_workspace" {
   description = "The Log Analytics Workspace resource"
   value       = azurerm_log_analytics_workspace.this

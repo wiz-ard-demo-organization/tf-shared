@@ -1,3 +1,4 @@
+# Module for creating and managing Azure SQL Server and databases with comprehensive security and configuration options
 terraform {
   required_providers {
     azurerm = {
@@ -7,19 +8,25 @@ terraform {
   }
 }
 
+# Create Azure SQL Server to host databases
 resource "azurerm_mssql_server" "this" {
   name                         = var.sql_server.name
   resource_group_name          = var.sql_server.resource_group_name
   location                     = var.sql_server.location
   version                      = var.sql_server.version
+  
+  # Authentication configuration
   administrator_login          = var.sql_server.administrator_login
   administrator_login_password = var.sql_server.administrator_login_password
+  
+  # Security settings
   minimum_tls_version          = var.sql_server.minimum_tls_version
   public_network_access_enabled = var.sql_server.public_network_access_enabled
   outbound_network_access_restricted = var.sql_server.outbound_network_access_restricted
   connection_policy            = var.sql_server.connection_policy
   transparent_data_encryption_key_vault_key_id = var.sql_server.transparent_data_encryption_key_vault_key_id
 
+  # Azure AD administrator configuration
   dynamic "azuread_administrator" {
     for_each = var.sql_server.azuread_administrator != null ? [var.sql_server.azuread_administrator] : []
     content {
@@ -30,6 +37,7 @@ resource "azurerm_mssql_server" "this" {
     }
   }
 
+  # Managed identity configuration
   dynamic "identity" {
     for_each = var.sql_server.identity != null ? [var.sql_server.identity] : []
     content {
@@ -41,35 +49,46 @@ resource "azurerm_mssql_server" "this" {
   tags = var.tags
 }
 
+# Create SQL databases within the server
 resource "azurerm_mssql_database" "this" {
   for_each = var.sql_databases
 
+  # Basic database configuration
   name                        = each.value.name
   server_id                   = azurerm_mssql_server.this.id
   collation                   = each.value.collation
   license_type                = each.value.license_type
+  
+  # Performance and scaling configuration
   max_size_gb                 = each.value.max_size_gb
   read_scale                  = each.value.read_scale
   sku_name                    = each.value.sku_name
   zone_redundant              = each.value.zone_redundant
   auto_pause_delay_in_minutes = each.value.auto_pause_delay_in_minutes
+  min_capacity                = each.value.min_capacity
+  read_replica_count          = each.value.read_replica_count
+  
+  # Database creation and restore options
   create_mode                 = each.value.create_mode
   creation_source_database_id = each.value.creation_source_database_id
   elastic_pool_id             = each.value.elastic_pool_id
-  geo_backup_enabled          = each.value.geo_backup_enabled
-  maintenance_configuration_name = each.value.maintenance_configuration_name
-  ledger_enabled              = each.value.ledger_enabled
-  min_capacity                = each.value.min_capacity
   restore_point_in_time       = each.value.restore_point_in_time
   recover_database_id         = each.value.recover_database_id
   restore_dropped_database_id = each.value.restore_dropped_database_id
-  read_replica_count          = each.value.read_replica_count
   sample_name                 = each.value.sample_name
+  
+  # Backup and maintenance settings
+  geo_backup_enabled          = each.value.geo_backup_enabled
+  maintenance_configuration_name = each.value.maintenance_configuration_name
   storage_account_type        = each.value.storage_account_type
+  
+  # Security and encryption settings
+  ledger_enabled              = each.value.ledger_enabled
   transparent_data_encryption_enabled = each.value.transparent_data_encryption_enabled
   transparent_data_encryption_key_vault_key_id = each.value.transparent_data_encryption_key_vault_key_id
   transparent_data_encryption_key_automatic_rotation_enabled = each.value.transparent_data_encryption_key_automatic_rotation_enabled
 
+  # Threat detection configuration
   dynamic "threat_detection_policy" {
     for_each = each.value.threat_detection_policy != null ? [each.value.threat_detection_policy] : []
     content {
@@ -83,6 +102,7 @@ resource "azurerm_mssql_database" "this" {
     }
   }
 
+  # Short-term backup retention configuration
   dynamic "short_term_retention_policy" {
     for_each = each.value.short_term_retention_policy != null ? [each.value.short_term_retention_policy] : []
     content {
@@ -91,6 +111,7 @@ resource "azurerm_mssql_database" "this" {
     }
   }
 
+  # Long-term backup retention configuration
   dynamic "long_term_retention_policy" {
     for_each = each.value.long_term_retention_policy != null ? [each.value.long_term_retention_policy] : []
     content {
@@ -101,6 +122,7 @@ resource "azurerm_mssql_database" "this" {
     }
   }
 
+  # Import configuration for migrating existing databases
   dynamic "import" {
     for_each = each.value.import != null ? [each.value.import] : []
     content {
@@ -115,6 +137,7 @@ resource "azurerm_mssql_database" "this" {
   tags = var.tags
 }
 
+# Configure firewall rules for SQL Server access
 resource "azurerm_mssql_firewall_rule" "this" {
   for_each = var.firewall_rules
 
@@ -124,6 +147,7 @@ resource "azurerm_mssql_firewall_rule" "this" {
   end_ip_address   = each.value.end_ip_address
 }
 
+# Configure virtual network rules for secure subnet access
 resource "azurerm_mssql_virtual_network_rule" "this" {
   for_each = var.virtual_network_rules
 
@@ -132,6 +156,7 @@ resource "azurerm_mssql_virtual_network_rule" "this" {
   subnet_id = each.value.subnet_id
 }
 
+# Configure extended auditing policy for compliance and monitoring
 resource "azurerm_mssql_server_extended_auditing_policy" "this" {
   count = var.extended_auditing_policy != null ? 1 : 0
 
@@ -144,6 +169,7 @@ resource "azurerm_mssql_server_extended_auditing_policy" "this" {
   log_monitoring_enabled                  = var.extended_auditing_policy.log_monitoring_enabled
 }
 
+# Configure security alert policy for threat detection
 resource "azurerm_mssql_server_security_alert_policy" "this" {
   count = var.security_alert_policy != null ? 1 : 0
 
@@ -158,6 +184,7 @@ resource "azurerm_mssql_server_security_alert_policy" "this" {
   storage_endpoint           = var.security_alert_policy.storage_endpoint
 }
 
+# Configure vulnerability assessment for security scanning
 resource "azurerm_mssql_server_vulnerability_assessment" "this" {
   count = var.vulnerability_assessment != null ? 1 : 0
 
@@ -165,6 +192,7 @@ resource "azurerm_mssql_server_vulnerability_assessment" "this" {
   storage_container_path          = var.vulnerability_assessment.storage_container_path
   storage_account_access_key      = var.vulnerability_assessment.storage_account_access_key
 
+  # Recurring scan configuration
   dynamic "recurring_scans" {
     for_each = var.vulnerability_assessment.recurring_scans != null ? [var.vulnerability_assessment.recurring_scans] : []
     content {
@@ -175,6 +203,7 @@ resource "azurerm_mssql_server_vulnerability_assessment" "this" {
   }
 }
 
+# Create elastic pools for database resource sharing
 resource "azurerm_mssql_elastic_pool" "this" {
   for_each = var.elastic_pools
 
@@ -187,6 +216,7 @@ resource "azurerm_mssql_elastic_pool" "this" {
   zone_redundant      = each.value.zone_redundant
   maintenance_configuration_name = each.value.maintenance_configuration_name
 
+  # Elastic pool SKU configuration
   sku {
     name     = each.value.sku.name
     tier     = each.value.sku.tier
@@ -194,6 +224,7 @@ resource "azurerm_mssql_elastic_pool" "this" {
     capacity = each.value.sku.capacity
   }
 
+  # Per-database resource limits within the pool
   per_database_settings {
     min_capacity = each.value.per_database_settings.min_capacity
     max_capacity = each.value.per_database_settings.max_capacity

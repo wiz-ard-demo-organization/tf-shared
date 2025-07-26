@@ -1,5 +1,25 @@
 variable "log_analytics_workspace" {
-  description = "Configuration for the Log Analytics Workspace"
+  description = <<EOT
+    log_analytics_workspace = {
+      name : "(Required) Specifies the name of the Log Analytics Workspace. Workspace name should include 4-63 letters, digits or '-'. The '-' shouldn't be the first or the last symbol. Changing this forces a new resource to be created."
+      location : "(Required) Specifies the supported Azure location where the resource exists. Changing this forces a new resource to be created."
+      resource_group_name : "(Required) The name of the resource group in which the Log Analytics workspace is created. Changing this forces a new resource to be created."
+      sku : "(Required) Specifies the SKU of the Log Analytics Workspace. Possible values are Free, PerNode, Premium, Standard, Standalone, Unlimited, CapacityReservation, and PerGB2018 (new SKU as of 2018-04-03). Defaults to PerGB2018."
+      retention_in_days : "(Optional) The workspace data retention in days. Possible values are either 7 (Free Tier only) or range between 30 and 730."
+      daily_quota_gb : "(Optional) The workspace daily quota for ingestion in GB. Defaults to -1 (unlimited) if omitted."
+      internet_ingestion_enabled : "(Optional) Should the Log Analytics Workspace support ingestion over the Public Internet? Defaults to true."
+      internet_query_enabled : "(Optional) Should the Log Analytics Workspace support querying over the Public Internet? Defaults to true."
+      reservation_capacity_in_gb_per_day : "(Optional) The capacity reservation level in GB for this workspace. Possible values are 100, 200, 300, 400, 500, 1000, 2000 and 5000."
+      data_collection_rule_id : "(Optional) The ID of the Data Collection Rule to use for this workspace."
+      immediate_data_purge_on_30_days_enabled : "(Optional) Whether to remove the data in the Log Analytics Workspace immediately after 30 days. Defaults to false."
+      local_authentication_disabled : "(Optional) Specifies if the Log Analytics Workspace should enforce authentication using Azure AD. Defaults to false."
+      cmk_for_query_forced : "(Optional) Is Customer Managed Storage mandatory for query management? Defaults to false."
+      identity : (Optional) An identity block. {
+        type : "(Required) Specifies the type of Managed Service Identity that should be configured on this Log Analytics Workspace. Possible values are SystemAssigned, UserAssigned, SystemAssigned, UserAssigned."
+        identity_ids : "(Optional) Specifies a list of User Assigned Managed Identity IDs to be assigned to this Log Analytics Workspace."
+      }
+    }
+  EOT
   type = object({
     name                       = string
     location                   = string
@@ -48,7 +68,15 @@ variable "log_analytics_workspace" {
 }
 
 variable "log_analytics_solutions" {
-  description = "Map of Log Analytics solutions to deploy"
+  description = <<EOT
+    log_analytics_solutions = {
+      solution_name : "(Required) Specifies the name of the solution to be deployed. Changing this forces a new resource to be created."
+      plan : (Required) A plan block. {
+        publisher : "(Required) The publisher of the solution. For example Microsoft."
+        product : "(Required) The product name of the solution. For example OMSGallery/Containers."
+      }
+    }
+  EOT
   type = map(object({
     solution_name = string
     plan = object({
@@ -86,7 +114,14 @@ variable "log_analytics_solutions" {
 }
 
 variable "data_export_rules" {
-  description = "Map of data export rules for the Log Analytics workspace"
+  description = <<EOT
+    data_export_rules = {
+      name : "(Required) The name of the Data Export Rule. Changing this forces a new resource to be created."
+      destination_resource_id : "(Required) The destination resource ID. This can be a Storage Account, an Event Hub Namespace or an Event Hub. Changing this forces a new resource to be created."
+      table_names : "(Required) A list of table names to export to the destination resource. Changing this forces a new resource to be created."
+      enabled : "(Optional) Is this data export rule enabled? Defaults to true."
+    }
+  EOT
   type = map(object({
     name                    = string
     destination_resource_id = string
@@ -104,7 +139,16 @@ variable "data_export_rules" {
 }
 
 variable "saved_searches" {
-  description = "Map of saved searches for the Log Analytics workspace"
+  description = <<EOT
+    saved_searches = {
+      name : "(Required) The name of the Saved Search. Changing this forces a new resource to be created."
+      category : "(Required) The category of the Saved Search."
+      display_name : "(Required) The display name for this Saved Search."
+      query : "(Required) The query expression for the saved search. Changing this forces a new resource to be created."
+      function_alias : "(Optional) The function alias if the query serves as a function."
+      function_parameters : "(Optional) The function parameters if the query serves as a function. Changing this forces a new resource to be created."
+    }
+  EOT
   type = map(object({
     name                = string
     category            = string
@@ -124,7 +168,11 @@ variable "saved_searches" {
 }
 
 variable "query_packs" {
-  description = "Map of query packs to create"
+  description = <<EOT
+    query_packs = {
+      name : "(Required) The name which should be used for this Log Analytics Query Pack. Changing this forces a new resource to be created."
+    }
+  EOT
   type = map(object({
     name = string
   }))
@@ -132,7 +180,20 @@ variable "query_packs" {
 }
 
 variable "query_pack_queries" {
-  description = "Map of queries to add to query packs"
+  description = <<EOT
+    query_pack_queries = {
+      query_pack_key : "(Required) The key reference to the query pack where this query should be added."
+      body : "(Required) The body of the Query Pack Query. Changing this forces a new resource to be created."
+      display_name : "(Required) The display name of the Query Pack Query."
+      name : "(Required) The unique name of the Query Pack Query. Changing this forces a new resource to be created."
+      description : "(Optional) The description of the Query Pack Query."
+      categories : "(Optional) A list of categorization tags for the query."
+      resource_types : "(Optional) A list of resource types that are applicable to this query."
+      solutions : "(Optional) A list of solution names that are applicable to this query."
+      tags : "(Optional) A mapping of tags which should be assigned to the Query Pack Query."
+      additional_settings_json : "(Optional) Additional settings for the Query Pack Query in JSON format."
+    }
+  EOT
   type = map(object({
     query_pack_key           = string
     body                     = string
@@ -156,6 +217,6 @@ variable "query_pack_queries" {
 }
 
 variable "tags" {
-  description = "A mapping of tags to assign to all resources"
+  description = "(Optional) A mapping of tags to assign to all resources created by this module."
   type        = map(string)
 } 

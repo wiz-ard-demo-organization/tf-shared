@@ -1,3 +1,4 @@
+# Outputs for the Azure Private Endpoint module - exposes endpoint details and DNS configurations for private connectivity
 output "private_endpoint" {
   description = "The Private Endpoint resource"
   value       = azurerm_private_endpoint.this
