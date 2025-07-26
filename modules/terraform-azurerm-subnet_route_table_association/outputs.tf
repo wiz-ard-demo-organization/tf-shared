@@ -1,4 +1,4 @@
-output "association_id" {
-  description = "The ID of the subnet route table association"
-  value       = azurerm_subnet_route_table_association.this.id
+output "subnet_route_table_association" {
+  description = "The subnet route table association resource"
+  value       = azurerm_subnet_route_table_association.this
 } 

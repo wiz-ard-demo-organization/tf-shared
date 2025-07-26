@@ -1,4 +1,4 @@
-output "association_id" {
-  description = "The ID of the subnet NSG association"
-  value       = azurerm_subnet_network_security_group_association.this.id
+output "subnet_network_security_group_association" {
+  description = "The subnet NSG association resource"
+  value       = azurerm_subnet_network_security_group_association.this
 } 
