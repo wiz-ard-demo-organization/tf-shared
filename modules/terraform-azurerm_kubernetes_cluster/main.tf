@@ -1,3 +1,4 @@
+# Module for creating and managing Azure Kubernetes Service (AKS) clusters with comprehensive configuration options
 terraform {
   required_providers {
     azurerm = {
@@ -7,7 +8,9 @@ terraform {
   }
 }
 
+# Create the AKS cluster with specified configuration for container orchestration
 resource "azurerm_kubernetes_cluster" "this" {
+  # Core cluster configuration
   name                                = var.kubernetes_cluster.name
   location                            = var.kubernetes_cluster.location
   resource_group_name                 = var.kubernetes_cluster.resource_group_name
@@ -15,6 +18,8 @@ resource "azurerm_kubernetes_cluster" "this" {
   dns_prefix_private_cluster          = var.kubernetes_cluster.dns_prefix_private_cluster
   kubernetes_version                  = var.kubernetes_cluster.kubernetes_version
   sku_tier                            = var.kubernetes_cluster.sku_tier
+  
+  # Network and security configuration
   api_server_authorized_ip_ranges     = var.kubernetes_cluster.api_server_authorized_ip_ranges
   node_resource_group                 = var.kubernetes_cluster.node_resource_group
   disk_encryption_set_id              = var.kubernetes_cluster.disk_encryption_set_id
@@ -22,9 +27,16 @@ resource "azurerm_kubernetes_cluster" "this" {
   private_dns_zone_id                 = var.kubernetes_cluster.private_dns_zone_id
   private_cluster_public_fqdn_enabled = var.kubernetes_cluster.private_cluster_public_fqdn_enabled
   public_network_access_enabled       = var.kubernetes_cluster.public_network_access_enabled
+  
+  # Access control and authentication
   role_based_access_control_enabled   = var.kubernetes_cluster.role_based_access_control_enabled
   local_account_disabled              = var.kubernetes_cluster.local_account_disabled
+  
+  # Upgrade and maintenance settings
   automatic_channel_upgrade           = var.kubernetes_cluster.automatic_channel_upgrade
+  node_os_channel_upgrade             = var.kubernetes_cluster.node_os_channel_upgrade
+  
+  # Add-ons and features
   azure_policy_enabled                = var.kubernetes_cluster.azure_policy_enabled
   # Removed deprecated: http_application_routing_enabled
   # Removed deprecated: open_service_mesh_enabled
@@ -35,44 +47,55 @@ resource "azurerm_kubernetes_cluster" "this" {
   cost_analysis_enabled               = var.kubernetes_cluster.cost_analysis_enabled
   run_command_enabled                 = var.kubernetes_cluster.run_command_enabled
   support_plan                        = var.kubernetes_cluster.support_plan
-  node_os_channel_upgrade             = var.kubernetes_cluster.node_os_channel_upgrade
 
-  # Default Node Pool
+  # Default Node Pool configuration - required system node pool for cluster operation
   default_node_pool {
+    # Basic node pool settings
     name                         = var.kubernetes_cluster.default_node_pool.name
     node_count                   = var.kubernetes_cluster.default_node_pool.node_count
     vm_size                      = var.kubernetes_cluster.default_node_pool.vm_size
     vnet_subnet_id               = var.kubernetes_cluster.default_node_pool.vnet_subnet_id
     zones                        = var.kubernetes_cluster.default_node_pool.zones
+    
+    # Auto-scaling configuration
     enable_auto_scaling          = var.kubernetes_cluster.default_node_pool.enable_auto_scaling
     min_count                    = var.kubernetes_cluster.default_node_pool.min_count
     max_count                    = var.kubernetes_cluster.default_node_pool.max_count
+    
+    # Pod and storage configuration
     max_pods                     = var.kubernetes_cluster.default_node_pool.max_pods
     os_disk_size_gb              = var.kubernetes_cluster.default_node_pool.os_disk_size_gb
     os_disk_type                 = var.kubernetes_cluster.default_node_pool.os_disk_type
     ultra_ssd_enabled            = var.kubernetes_cluster.default_node_pool.ultra_ssd_enabled
+    kubelet_disk_type            = var.kubernetes_cluster.default_node_pool.kubelet_disk_type
+    
+    # Network settings
     node_public_ip_enabled       = var.kubernetes_cluster.default_node_pool.node_public_ip_enabled
     node_public_ip_prefix_id     = var.kubernetes_cluster.default_node_pool.node_public_ip_prefix_id
-    enable_host_encryption       = var.kubernetes_cluster.default_node_pool.enable_host_encryption
     enable_node_public_ip        = var.kubernetes_cluster.default_node_pool.enable_node_public_ip
-    kubelet_disk_type            = var.kubernetes_cluster.default_node_pool.kubelet_disk_type
+    pod_subnet_id                = var.kubernetes_cluster.default_node_pool.pod_subnet_id
+    
+    # Security and encryption
+    enable_host_encryption       = var.kubernetes_cluster.default_node_pool.enable_host_encryption
+    fips_enabled                 = var.kubernetes_cluster.default_node_pool.fips_enabled
+    
+    # Advanced configuration
     temporary_name_for_rotation  = var.kubernetes_cluster.default_node_pool.temporary_name_for_rotation
     type                         = var.kubernetes_cluster.default_node_pool.type
     orchestrator_version         = var.kubernetes_cluster.default_node_pool.orchestrator_version
     proximity_placement_group_id = var.kubernetes_cluster.default_node_pool.proximity_placement_group_id
     workload_runtime             = var.kubernetes_cluster.default_node_pool.workload_runtime
     only_critical_addons_enabled = var.kubernetes_cluster.default_node_pool.only_critical_addons_enabled
-    pod_subnet_id                = var.kubernetes_cluster.default_node_pool.pod_subnet_id
     scale_down_mode              = var.kubernetes_cluster.default_node_pool.scale_down_mode
     snapshot_id                  = var.kubernetes_cluster.default_node_pool.snapshot_id
     host_group_id                = var.kubernetes_cluster.default_node_pool.host_group_id
     capacity_reservation_group_id = var.kubernetes_cluster.default_node_pool.capacity_reservation_group_id
-    fips_enabled                 = var.kubernetes_cluster.default_node_pool.fips_enabled
     gpu_instance_profile         = var.kubernetes_cluster.default_node_pool.gpu_instance_profile
     message_of_the_day           = var.kubernetes_cluster.default_node_pool.message_of_the_day
     node_labels                  = var.kubernetes_cluster.default_node_pool.node_labels
     node_taints                  = var.kubernetes_cluster.default_node_pool.node_taints
 
+    # Kubelet configuration for container runtime tuning
     dynamic "kubelet_config" {
       for_each = var.kubernetes_cluster.default_node_pool.kubelet_config != null ? [var.kubernetes_cluster.default_node_pool.kubelet_config] : []
       content {
@@ -89,6 +112,7 @@ resource "azurerm_kubernetes_cluster" "this" {
       }
     }
 
+    # Linux OS configuration for kernel tuning
     dynamic "linux_os_config" {
       for_each = var.kubernetes_cluster.default_node_pool.linux_os_config != null ? [var.kubernetes_cluster.default_node_pool.linux_os_config] : []
       content {
@@ -96,6 +120,7 @@ resource "azurerm_kubernetes_cluster" "this" {
         transparent_huge_page_enabled = linux_os_config.value.transparent_huge_page_enabled
         transparent_huge_page_defrag  = linux_os_config.value.transparent_huge_page_defrag
 
+        # System control (sysctl) kernel parameters
         dynamic "sysctl_config" {
           for_each = linux_os_config.value.sysctl_config != null ? [linux_os_config.value.sysctl_config] : []
           content {
@@ -133,6 +158,7 @@ resource "azurerm_kubernetes_cluster" "this" {
       }
     }
 
+    # Node network profile for security group and IP tag configuration
     dynamic "node_network_profile" {
       for_each = var.kubernetes_cluster.default_node_pool.node_network_profile != null ? [var.kubernetes_cluster.default_node_pool.node_network_profile] : []
       content {
@@ -141,6 +167,7 @@ resource "azurerm_kubernetes_cluster" "this" {
       }
     }
 
+    # Upgrade settings for controlled node pool updates
     dynamic "upgrade_settings" {
       for_each = var.kubernetes_cluster.default_node_pool.upgrade_settings != null ? [var.kubernetes_cluster.default_node_pool.upgrade_settings] : []
       content {
@@ -153,26 +180,32 @@ resource "azurerm_kubernetes_cluster" "this" {
     tags = var.tags
   }
 
-  # Network Profile
+  # Network Profile - defines cluster networking architecture and policies
   dynamic "network_profile" {
     for_each = var.kubernetes_cluster.network_profile != null ? [var.kubernetes_cluster.network_profile] : []
     content {
+      # Core networking configuration
       network_plugin      = network_profile.value.network_plugin
       network_mode        = network_profile.value.network_mode
       network_policy      = network_profile.value.network_policy
       dns_service_ip      = network_profile.value.dns_service_ip
       # Removed deprecated: docker_bridge_cidr
       outbound_type       = network_profile.value.outbound_type
+      
+      # IP address ranges for pods and services
       pod_cidr            = network_profile.value.pod_cidr
       pod_cidrs           = network_profile.value.pod_cidrs
       service_cidr        = network_profile.value.service_cidr
       service_cidrs       = network_profile.value.service_cidrs
       ip_versions         = network_profile.value.ip_versions
+      
+      # Advanced networking features
       load_balancer_sku   = network_profile.value.load_balancer_sku
       network_plugin_mode = network_profile.value.network_plugin_mode
       network_data_plane  = network_profile.value.network_data_plane
       ebpf_data_plane     = network_profile.value.ebpf_data_plane
 
+      # Load balancer configuration for outbound connectivity
       dynamic "load_balancer_profile" {
         for_each = network_profile.value.load_balancer_profile != null ? [network_profile.value.load_balancer_profile] : []
         content {
@@ -185,6 +218,7 @@ resource "azurerm_kubernetes_cluster" "this" {
         }
       }
 
+      # NAT gateway configuration for outbound connectivity
       dynamic "nat_gateway_profile" {
         for_each = network_profile.value.nat_gateway_profile != null ? [network_profile.value.nat_gateway_profile] : []
         content {
@@ -195,7 +229,7 @@ resource "azurerm_kubernetes_cluster" "this" {
     }
   }
 
-  # Identity
+  # Identity configuration for managed identity authentication
   dynamic "identity" {
     for_each = var.kubernetes_cluster.identity != null ? [var.kubernetes_cluster.identity] : []
     content {
@@ -204,7 +238,7 @@ resource "azurerm_kubernetes_cluster" "this" {
     }
   }
 
-  # Service Principal
+  # Service Principal configuration for legacy authentication (prefer managed identity)
   dynamic "service_principal" {
     for_each = var.kubernetes_cluster.service_principal != null ? [var.kubernetes_cluster.service_principal] : []
     content {
@@ -213,7 +247,7 @@ resource "azurerm_kubernetes_cluster" "this" {
     }
   }
 
-  # Auto Scaler Profile
+  # Auto Scaler Profile - configures cluster autoscaler behavior
   dynamic "auto_scaler_profile" {
     for_each = var.kubernetes_cluster.auto_scaler_profile != null ? [var.kubernetes_cluster.auto_scaler_profile] : []
     content {
@@ -237,7 +271,7 @@ resource "azurerm_kubernetes_cluster" "this" {
     }
   }
 
-  # API Server Access Profile (new)
+  # API Server Access Profile - controls API server network accessibility
   dynamic "api_server_access_profile" {
     for_each = var.kubernetes_cluster.api_server_access_profile != null ? [var.kubernetes_cluster.api_server_access_profile] : []
     content {
@@ -247,7 +281,7 @@ resource "azurerm_kubernetes_cluster" "this" {
     }
   }
 
-  # Azure Active Directory Role Based Access Control
+  # Azure Active Directory Role Based Access Control for cluster authentication
   dynamic "azure_active_directory_role_based_access_control" {
     for_each = var.kubernetes_cluster.azure_active_directory_role_based_access_control != null ? [var.kubernetes_cluster.azure_active_directory_role_based_access_control] : []
     content {
@@ -259,7 +293,7 @@ resource "azurerm_kubernetes_cluster" "this" {
     }
   }
 
-  # HTTP Proxy Config
+  # HTTP Proxy Config - configures proxy settings for cluster egress traffic
   dynamic "http_proxy_config" {
     for_each = var.kubernetes_cluster.http_proxy_config != null ? [var.kubernetes_cluster.http_proxy_config] : []
     content {
@@ -270,7 +304,7 @@ resource "azurerm_kubernetes_cluster" "this" {
     }
   }
 
-  # OMS Agent
+  # OMS Agent - enables Azure Monitor for containers
   dynamic "oms_agent" {
     for_each = var.kubernetes_cluster.oms_agent != null ? [var.kubernetes_cluster.oms_agent] : []
     content {
@@ -279,7 +313,7 @@ resource "azurerm_kubernetes_cluster" "this" {
     }
   }
 
-  # Ingress Application Gateway
+  # Ingress Application Gateway - integrates Azure Application Gateway as ingress controller
   dynamic "ingress_application_gateway" {
     for_each = var.kubernetes_cluster.ingress_application_gateway != null ? [var.kubernetes_cluster.ingress_application_gateway] : []
     content {
@@ -290,7 +324,7 @@ resource "azurerm_kubernetes_cluster" "this" {
     }
   }
 
-  # Key Vault Secrets Provider
+  # Key Vault Secrets Provider - enables secrets store CSI driver for Azure Key Vault
   dynamic "key_vault_secrets_provider" {
     for_each = var.kubernetes_cluster.key_vault_secrets_provider != null ? [var.kubernetes_cluster.key_vault_secrets_provider] : []
     content {
@@ -299,7 +333,7 @@ resource "azurerm_kubernetes_cluster" "this" {
     }
   }
 
-  # Linux Profile
+  # Linux Profile - SSH configuration for Linux nodes
   dynamic "linux_profile" {
     for_each = var.kubernetes_cluster.linux_profile != null ? [var.kubernetes_cluster.linux_profile] : []
     content {
@@ -311,7 +345,7 @@ resource "azurerm_kubernetes_cluster" "this" {
     }
   }
 
-  # Windows Profile
+  # Windows Profile - configuration for Windows node pools
   dynamic "windows_profile" {
     for_each = var.kubernetes_cluster.windows_profile != null ? [var.kubernetes_cluster.windows_profile] : []
     content {
@@ -319,6 +353,7 @@ resource "azurerm_kubernetes_cluster" "this" {
       admin_password = windows_profile.value.admin_password
       license        = windows_profile.value.license
 
+      # Group Managed Service Account configuration for Windows containers
       dynamic "gmsa" {
         for_each = windows_profile.value.gmsa != null ? [windows_profile.value.gmsa] : []
         content {
@@ -329,10 +364,11 @@ resource "azurerm_kubernetes_cluster" "this" {
     }
   }
 
-  # Maintenance Window
+  # Maintenance Window - defines allowed times for cluster maintenance
   dynamic "maintenance_window" {
     for_each = var.kubernetes_cluster.maintenance_window != null ? [var.kubernetes_cluster.maintenance_window] : []
     content {
+      # Allowed maintenance windows
       dynamic "allowed" {
         for_each = maintenance_window.value.allowed != null ? maintenance_window.value.allowed : []
         content {
@@ -341,6 +377,7 @@ resource "azurerm_kubernetes_cluster" "this" {
         }
       }
 
+      # Blocked time periods for maintenance
       dynamic "not_allowed" {
         for_each = maintenance_window.value.not_allowed != null ? maintenance_window.value.not_allowed : []
         content {
@@ -351,7 +388,7 @@ resource "azurerm_kubernetes_cluster" "this" {
     }
   }
 
-  # Maintenance Window Auto Upgrade (new)
+  # Maintenance Window Auto Upgrade - schedule for automatic cluster upgrades
   dynamic "maintenance_window_auto_upgrade" {
     for_each = var.kubernetes_cluster.maintenance_window_auto_upgrade != null ? [var.kubernetes_cluster.maintenance_window_auto_upgrade] : []
     content {
@@ -365,6 +402,7 @@ resource "azurerm_kubernetes_cluster" "this" {
       utc_offset  = maintenance_window_auto_upgrade.value.utc_offset
       start_date  = maintenance_window_auto_upgrade.value.start_date
 
+      # Blocked time periods for auto upgrades
       dynamic "not_allowed" {
         for_each = maintenance_window_auto_upgrade.value.not_allowed != null ? maintenance_window_auto_upgrade.value.not_allowed : []
         content {
@@ -375,7 +413,7 @@ resource "azurerm_kubernetes_cluster" "this" {
     }
   }
 
-  # Maintenance Window Node OS (new)
+  # Maintenance Window Node OS - schedule for node OS updates
   dynamic "maintenance_window_node_os" {
     for_each = var.kubernetes_cluster.maintenance_window_node_os != null ? [var.kubernetes_cluster.maintenance_window_node_os] : []
     content {
@@ -389,6 +427,7 @@ resource "azurerm_kubernetes_cluster" "this" {
       utc_offset  = maintenance_window_node_os.value.utc_offset
       start_date  = maintenance_window_node_os.value.start_date
 
+      # Blocked time periods for node OS updates
       dynamic "not_allowed" {
         for_each = maintenance_window_node_os.value.not_allowed != null ? maintenance_window_node_os.value.not_allowed : []
         content {
@@ -399,7 +438,7 @@ resource "azurerm_kubernetes_cluster" "this" {
     }
   }
 
-  # Microsoft Defender
+  # Microsoft Defender - enables security monitoring and threat protection
   dynamic "microsoft_defender" {
     for_each = var.kubernetes_cluster.microsoft_defender != null ? [var.kubernetes_cluster.microsoft_defender] : []
     content {
@@ -407,7 +446,7 @@ resource "azurerm_kubernetes_cluster" "this" {
     }
   }
 
-  # Monitor Metrics
+  # Monitor Metrics - configures Prometheus metrics collection
   dynamic "monitor_metrics" {
     for_each = var.kubernetes_cluster.monitor_metrics != null ? [var.kubernetes_cluster.monitor_metrics] : []
     content {
@@ -416,7 +455,7 @@ resource "azurerm_kubernetes_cluster" "this" {
     }
   }
 
-  # Storage Profile
+  # Storage Profile - configures CSI storage drivers
   dynamic "storage_profile" {
     for_each = var.kubernetes_cluster.storage_profile != null ? [var.kubernetes_cluster.storage_profile] : []
     content {
@@ -428,7 +467,7 @@ resource "azurerm_kubernetes_cluster" "this" {
     }
   }
 
-  # Web App Routing (replaces http_application_routing)
+  # Web App Routing - enables managed NGINX ingress controller with DNS integration
   dynamic "web_app_routing" {
     for_each = var.kubernetes_cluster.web_app_routing != null ? [var.kubernetes_cluster.web_app_routing] : []
     content {
@@ -438,7 +477,7 @@ resource "azurerm_kubernetes_cluster" "this" {
     }
   }
 
-  # Workload Autoscaler Profile
+  # Workload Autoscaler Profile - enables advanced autoscaling features
   dynamic "workload_autoscaler_profile" {
     for_each = var.kubernetes_cluster.workload_autoscaler_profile != null ? [var.kubernetes_cluster.workload_autoscaler_profile] : []
     content {
@@ -447,7 +486,7 @@ resource "azurerm_kubernetes_cluster" "this" {
     }
   }
 
-  # Service Mesh Profile (new)
+  # Service Mesh Profile - configures Istio-based service mesh
   dynamic "service_mesh_profile" {
     for_each = var.kubernetes_cluster.service_mesh_profile != null ? [var.kubernetes_cluster.service_mesh_profile] : []
     content {

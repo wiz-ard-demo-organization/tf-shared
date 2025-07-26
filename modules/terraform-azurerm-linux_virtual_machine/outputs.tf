@@ -1,3 +1,4 @@
+# Outputs for the Azure Linux Virtual Machine module - exposes VM IDs, network details, and public/private IP addresses for integration
 output "virtual_machine_id" {
   description = "The ID of the Linux Virtual Machine"
   value       = azurerm_linux_virtual_machine.this.id
