@@ -1,3 +1,4 @@
+// Outputs for the Azure Public IP module
 output "public_ip_id" {
   description = "The ID of the Public IP"
   value       = azurerm_public_ip.this.id

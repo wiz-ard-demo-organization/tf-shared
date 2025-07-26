@@ -1,5 +1,24 @@
 variable "public_ip" {
-  description = "Configuration for the Azure Public IP"
+  description = <<EOT
+public_ip = {
+  name : "(Required) Specifies the name of the Public IP resource. Changing this forces a new resource to be created."
+  location : "(Required) Specifies the Azure region where the resource exists. Changing this forces a new resource to be created."
+  resource_group_name : "(Required) The name of the resource group in which to create the Public IP. Changing this forces a new resource to be created."
+  allocation_method : "(Required) The allocation method for the Public IP. Must be either Static or Dynamic. Changing this forces a new resource to be created."
+  sku : "(Optional) SKU of the Public IP. Possible values are Basic and Standard."
+  sku_tier : "(Optional) SKU tier of the Public IP. Possible values are Regional and Global."
+  zones : "(Optional) A list of Availability Zones into which to provision the Public IP. Changing this forces a new resource to be created."
+  domain_name_label : "(Optional) A domain name label. Changing this forces a new resource to be created."
+  idle_timeout_in_minutes : "(Optional) The timeout for idle connections in minutes."
+  ip_version : "(Optional) The IP version. Possible values are IPv4 and IPv6."
+  ip_tags : "(Optional) A mapping of IP tags."
+  public_ip_prefix_id : "(Optional) The ID of the Public IP Prefix to associate."
+  reverse_fqdn : "(Optional) The reverse FQDN of the Public IP."
+  edge_zone : "(Optional) Edge zone in which to create the resource."
+  ddos_protection_mode : "(Optional) The DDOS protection mode. Possible values are Off, Alert, Deny."
+  ddos_protection_plan_id : "(Optional) The ID of the DDOS protection plan to apply."
+}
+EOT
   type = object({
     name                    = string
     location                = string
@@ -41,6 +60,6 @@ variable "public_ip" {
 }
 
 variable "tags" {
-  description = "A mapping of tags to assign to the resource"
+  description = "(Optional) A mapping of tags to assign to the resource"
   type        = map(string)
 } 

@@ -1,3 +1,4 @@
+// Module to create an Azure Public IP resource with customizable settings.
 terraform {
   required_providers {
     azurerm = {
@@ -7,6 +8,7 @@ terraform {
   }
 }
 
+// Create an Azure Public IP resource with the provided configuration.
 resource "azurerm_public_ip" "this" {
   name                    = var.public_ip.name
   location                = var.public_ip.location
