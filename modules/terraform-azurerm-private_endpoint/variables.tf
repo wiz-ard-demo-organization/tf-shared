@@ -11,7 +11,34 @@ variable "global_settings" {
 }
 
 variable "private_endpoint" {
-  description = "Configuration for the Private Endpoint"
+  description = <<EOT
+    private_endpoint = {
+      name : "(Required) Specifies the Name of the Private Endpoint. Changing this forces a new resource to be created."
+      location : "(Required) The supported Azure location where the resource exists. Changing this forces a new resource to be created."
+      resource_group_name : "(Required) Specifies the Name of the Resource Group within which the Private Endpoint should exist. Changing this forces a new resource to be created."
+      subnet_id : "(Required) The ID of the Subnet from which Private IP Addresses will be allocated for this Private Endpoint. Changing this forces a new resource to be created."
+      custom_network_interface_name : "(Optional) The custom name of the network interface attached to the private endpoint. Changing this forces a new resource to be created."
+      private_service_connection : (Required) A private_service_connection block. {
+        name : "(Required) Specifies the Name of the Private Service Connection. Changing this forces a new resource to be created."
+        private_connection_resource_id : "(Optional) The ID of the Private Link Enabled Remote Resource which this Private Endpoint should be connected to. Conflicts with private_connection_resource_alias. Changing this forces a new resource to be created."
+        group_ids : "(Optional) A list of subresource group ids to associate with the Private Endpoint. Required for some services. Changing this forces a new resource to be created."
+        subresource_names : "(Optional) A list of subresource names which the Private Endpoint is able to connect to. Changing this forces a new resource to be created."
+        is_manual_connection : "(Optional) Does the Private Endpoint require Manual Approval from the remote resource owner? Defaults to false."
+        private_connection_resource_alias : "(Optional) The Service Alias of the Private Link Enabled Remote Resource which this Private Endpoint should be connected to. Conflicts with private_connection_resource_id. Changing this forces a new resource to be created."
+        request_message : "(Optional) A message passed to the owner of the remote resource when the private endpoint attempts to establish the connection to the remote resource. Required when is_manual_connection is true."
+      }
+      private_dns_zone_group : (Optional) A private_dns_zone_group block. {
+        name : "(Required) Specifies the Name of the Private DNS Zone Group."
+        private_dns_zone_ids : "(Required) Specifies the list of Private DNS Zones to include within the private_dns_zone_group."
+      }
+      ip_configuration : (Optional) One or more ip_configuration blocks. {
+        name : "(Required) Specifies the Name of the IP Configuration. Changing this forces a new resource to be created."
+        private_ip_address : "(Required) Specifies the static IP address within the private endpoint's subnet to be used. Changing this forces a new resource to be created."
+        subresource_name : "(Optional) Specifies the subresource this IP address applies to. Changing this forces a new resource to be created."
+        member_name : "(Optional) Specifies the member name this IP address applies to. Changing this forces a new resource to be created."
+      }
+    }
+  EOT
   type = object({
     name                          = string
     location                      = string
@@ -68,7 +95,21 @@ variable "private_endpoint" {
 }
 
 variable "private_dns_zones" {
-  description = "Map of Private DNS Zones to create"
+  description = <<EOT
+    private_dns_zones = {
+      name : "(Required) The name of the Private DNS Zone. Must be a valid domain name. Changing this forces a new resource to be created."
+      soa_record : (Optional) An soa_record block. {
+        email : "(Required) The email contact for the SOA record."
+        expire_time : "(Optional) The expire time for the SOA record. Defaults to 2419200."
+        minimum_ttl : "(Optional) The minimum Time To Live for the SOA record. By convention, it is used to determine the negative caching duration. Defaults to 10."
+        refresh_time : "(Optional) The refresh time for the SOA record. Defaults to 3600."
+        retry_time : "(Optional) The retry time for the SOA record. Defaults to 300."
+        serial_number : "(Optional) The serial number for the SOA record. Defaults to 1."
+        ttl : "(Optional) The Time To Live of the SOA Record in seconds. Defaults to 3600."
+        tags : "(Optional) A mapping of tags to assign to the SOA Record."
+      }
+    }
+  EOT
   type = map(object({
     name = string
 
@@ -94,7 +135,14 @@ variable "private_dns_zones" {
 }
 
 variable "private_dns_zone_virtual_network_links" {
-  description = "Map of Private DNS Zone Virtual Network Links"
+  description = <<EOT
+    private_dns_zone_virtual_network_links = {
+      name : "(Required) The name of the Private DNS Zone Virtual Network Link. Changing this forces a new resource to be created."
+      private_dns_zone_key : "(Required) The key reference to the Private DNS Zone to link."
+      virtual_network_id : "(Required) The Resource ID of the Virtual Network that should be linked to the DNS Zone. Changing this forces a new resource to be created."
+      registration_enabled : "(Optional) Is auto-registration of virtual machine records in the virtual network in the Private DNS zone enabled? Defaults to false."
+    }
+  EOT
   type = map(object({
     name                 = string
     private_dns_zone_key = string
@@ -105,7 +153,14 @@ variable "private_dns_zone_virtual_network_links" {
 }
 
 variable "private_dns_a_records" {
-  description = "Map of Private DNS A Records to create"
+  description = <<EOT
+    private_dns_a_records = {
+      name : "(Required) The name of the DNS A Record. Changing this forces a new resource to be created."
+      private_dns_zone_key : "(Required) The key reference to the Private DNS Zone where this record should be created."
+      ttl : "(Optional) The Time To Live (TTL) of the DNS record in seconds. Defaults to 300."
+      records : "(Required) List of IPv4 addresses."
+    }
+  EOT
   type = map(object({
     name                 = string
     private_dns_zone_key = string
@@ -139,6 +194,6 @@ variable "private_dns_a_records" {
 }
 
 variable "tags" {
-  description = "A mapping of tags to assign to all resources"
+  description = "(Optional) A mapping of tags to assign to all resources created by this module."
   type        = map(string)
 } 

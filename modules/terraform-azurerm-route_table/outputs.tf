@@ -1,3 +1,4 @@
+# Outputs for the Azure Route Table module - exposes route table details and configured routes for network management
 output "route_table" {
   description = "The Route Table resource"
   value       = azurerm_route_table.this

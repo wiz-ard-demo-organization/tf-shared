@@ -11,7 +11,14 @@ variable "global_settings" {
 }
 
 variable "route_table" {
-  description = "Configuration for the Route Table"
+  description = <<EOT
+    route_table = {
+      name : "(Required) The name of the route table. Changing this forces a new resource to be created."
+      location : "(Required) Specifies the supported Azure location where the resource exists. Changing this forces a new resource to be created."
+      resource_group_name : "(Required) The name of the resource group in which to create the route table. Changing this forces a new resource to be created."
+      disable_bgp_route_propagation : "(Optional) Boolean flag which controls propagation of routes learned by BGP on that route table. True means disable. Defaults to false."
+    }
+  EOT
   type = object({
     name                          = string
     location                      = string
@@ -21,7 +28,14 @@ variable "route_table" {
 }
 
 variable "routes" {
-  description = "Map of routes to create in the route table"
+  description = <<EOT
+    routes = {
+      name : "(Required) The name of the route. Changing this forces a new resource to be created."
+      address_prefix : "(Required) The destination to which the route applies. Can be CIDR (such as 10.1.0.0/16) or Azure Service Tag (such as ApiManagement, AzureBackup or AzureBotService)."
+      next_hop_type : "(Required) The type of Azure hop the packet should be sent to. Possible values are VirtualNetworkGateway, VnetLocal, Internet, VirtualAppliance and None."
+      next_hop_in_ip_address : "(Optional) Contains the IP address packets should be forwarded to. Next hop values are only allowed in routes where the next hop type is VirtualAppliance."
+    }
+  EOT
   type = map(object({
     name                   = string
     address_prefix         = string
@@ -60,6 +74,6 @@ variable "routes" {
 }
 
 variable "tags" {
-  description = "A mapping of tags to assign to all resources"
+  description = "(Optional) A mapping of tags to assign to all resources created by this module."
   type        = map(string)
 } 

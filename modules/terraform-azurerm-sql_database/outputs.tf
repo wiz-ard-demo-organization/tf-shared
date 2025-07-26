@@ -1,3 +1,4 @@
+# Outputs for the Azure SQL Database module - exposes server, database, security, and pool configurations
 output "sql_server" {
   description = "The SQL Server resource"
   value       = azurerm_mssql_server.this

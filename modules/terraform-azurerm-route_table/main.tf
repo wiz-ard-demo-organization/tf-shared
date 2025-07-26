@@ -1,3 +1,4 @@
+# Module for creating and managing Azure Route Tables to control network traffic routing
 terraform {
   required_providers {
     azurerm = {
@@ -23,6 +24,7 @@ resource "azurerm_route_table" "this" {
   tags = var.tags
 }
 
+# Create individual routes within the route table to define traffic paths
 resource "azurerm_route" "this" {
   for_each = var.routes
 

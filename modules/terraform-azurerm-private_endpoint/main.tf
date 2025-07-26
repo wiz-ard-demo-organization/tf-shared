@@ -1,3 +1,4 @@
+# Module for creating Azure Private Endpoints to enable private connectivity to Azure services
 terraform {
   required_providers {
     azurerm = {
@@ -21,6 +22,7 @@ resource "azurerm_private_endpoint" "this" {
   subnet_id                     = var.private_endpoint.subnet_id
   custom_network_interface_name = var.private_endpoint.custom_network_interface_name
 
+  # Configure the connection to the target Azure service
   private_service_connection {
     name                           = var.private_endpoint.private_service_connection.name
     private_connection_resource_id = var.private_endpoint.private_service_connection.private_connection_resource_id
@@ -31,6 +33,7 @@ resource "azurerm_private_endpoint" "this" {
     request_message                = var.private_endpoint.private_service_connection.request_message
   }
 
+  # Configure DNS zone group for automatic DNS registration
   dynamic "private_dns_zone_group" {
     for_each = var.private_endpoint.private_dns_zone_group != null ? [var.private_endpoint.private_dns_zone_group] : []
     content {
@@ -39,6 +42,7 @@ resource "azurerm_private_endpoint" "this" {
     }
   }
 
+  # Configure static IP addresses for the private endpoint
   dynamic "ip_configuration" {
     for_each = var.private_endpoint.ip_configuration != null ? var.private_endpoint.ip_configuration : []
     content {
@@ -52,13 +56,14 @@ resource "azurerm_private_endpoint" "this" {
   tags = var.tags
 }
 
-# Create Private DNS Zone if specified
+# Create Private DNS Zone for name resolution of private endpoints
 resource "azurerm_private_dns_zone" "this" {
   for_each = var.private_dns_zones
 
   name                = each.value.name
   resource_group_name = var.private_endpoint.resource_group_name
 
+  # Configure SOA record settings
   dynamic "soa_record" {
     for_each = each.value.soa_record != null ? [each.value.soa_record] : []
     content {
@@ -76,7 +81,7 @@ resource "azurerm_private_dns_zone" "this" {
   tags = var.tags
 }
 
-# Link Private DNS Zone to Virtual Network
+# Link Private DNS Zone to Virtual Network for DNS resolution
 resource "azurerm_private_dns_zone_virtual_network_link" "this" {
   for_each = var.private_dns_zone_virtual_network_links
 
@@ -89,7 +94,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "this" {
   tags = var.tags
 }
 
-# Create DNS A Records for the private endpoint
+# Create DNS A Records for custom DNS resolution
 resource "azurerm_private_dns_a_record" "this" {
   for_each = var.private_dns_a_records
 
