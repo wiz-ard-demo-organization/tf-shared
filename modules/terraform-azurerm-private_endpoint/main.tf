@@ -7,8 +7,15 @@ terraform {
   }
 }
 
+module "name" {
+  source          = "../_global/modules/naming"
+  key             = var.key
+  global_settings = var.global_settings
+  resource_type   = "azurerm_private_endpoint"
+}
+
 resource "azurerm_private_endpoint" "this" {
-  name                          = var.private_endpoint.name
+  name                          = try(var.private_endpoint.name, module.name.result)
   location                      = var.private_endpoint.location
   resource_group_name           = var.private_endpoint.resource_group_name
   subnet_id                     = var.private_endpoint.subnet_id

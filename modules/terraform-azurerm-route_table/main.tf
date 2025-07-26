@@ -7,8 +7,15 @@ terraform {
   }
 }
 
+module "name" {
+  source          = "../_global/modules/naming"
+  key             = var.key
+  global_settings = var.global_settings
+  resource_type   = "azurerm_route_table"
+}
+
 resource "azurerm_route_table" "this" {
-  name                          = var.route_table.name
+  name                          = try(var.route_table.name, module.name.result)
   location                      = var.route_table.location
   resource_group_name           = var.route_table.resource_group_name
   disable_bgp_route_propagation = var.route_table.disable_bgp_route_propagation

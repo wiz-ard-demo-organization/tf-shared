@@ -7,8 +7,15 @@ terraform {
   }
 }
 
+module "server_name" {
+  source          = "../_global/modules/naming"
+  key             = var.key
+  global_settings = var.global_settings
+  resource_type   = "azurerm_mssql_server"
+}
+
 resource "azurerm_mssql_server" "this" {
-  name                         = var.sql_server.name
+  name                         = try(var.sql_server.name, module.server_name.result)
   resource_group_name          = var.sql_server.resource_group_name
   location                     = var.sql_server.location
   version                      = var.sql_server.version

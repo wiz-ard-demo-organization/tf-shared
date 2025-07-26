@@ -8,11 +8,32 @@ terraform {
   }
 }
 
+module "vm_name" {
+  source          = "../_global/modules/naming"
+  key             = var.key
+  global_settings = var.global_settings
+  resource_type   = "azurerm_linux_virtual_machine"
+}
+
+module "nic_name" {
+  source          = "../_global/modules/naming"
+  key             = var.key
+  global_settings = var.global_settings
+  resource_type   = "azurerm_network_interface"
+}
+
+module "pip_name" {
+  source          = "../_global/modules/naming"
+  key             = var.key
+  global_settings = var.global_settings
+  resource_type   = "azurerm_public_ip"
+}
+
 # Create optional public IP for the virtual machine if external access is required
 resource "azurerm_public_ip" "this" {
   count = var.linux_virtual_machine.create_public_ip ? 1 : 0
 
-  name                = var.public_ip_config.name
+  name                = try(var.public_ip_config.name, module.pip_name.result)
   location            = var.linux_virtual_machine.location
   resource_group_name = var.linux_virtual_machine.resource_group_name
   allocation_method   = var.public_ip_config.allocation_method
@@ -27,7 +48,7 @@ resource "azurerm_public_ip" "this" {
 
 # Create network interface for the virtual machine with IP configurations
 resource "azurerm_network_interface" "this" {
-  name                = var.network_interface.name
+  name                = try(var.network_interface.name, module.nic_name.result)
   location            = var.linux_virtual_machine.location
   resource_group_name = var.linux_virtual_machine.resource_group_name
 
@@ -57,7 +78,7 @@ resource "azurerm_network_interface_security_group_association" "this" {
 
 # Create the Linux Virtual Machine with specified configuration
 resource "azurerm_linux_virtual_machine" "this" {
-  name                = var.linux_virtual_machine.name
+  name                = try(var.linux_virtual_machine.name, module.vm_name.result)
   location            = var.linux_virtual_machine.location
   resource_group_name = var.linux_virtual_machine.resource_group_name
   size                = var.linux_virtual_machine.size

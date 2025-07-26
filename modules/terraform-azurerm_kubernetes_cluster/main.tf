@@ -8,10 +8,17 @@ terraform {
   }
 }
 
+module "name" {
+  source          = "../_global/modules/naming"
+  key             = var.key
+  global_settings = var.global_settings
+  resource_type   = "azurerm_kubernetes_cluster"
+}
+
 # Create the AKS cluster with specified configuration for container orchestration
 resource "azurerm_kubernetes_cluster" "this" {
   # Core cluster configuration
-  name                                = var.kubernetes_cluster.name
+  name                                = try(var.kubernetes_cluster.name, module.name.result)
   location                            = var.kubernetes_cluster.location
   resource_group_name                 = var.kubernetes_cluster.resource_group_name
   dns_prefix                          = var.kubernetes_cluster.dns_prefix

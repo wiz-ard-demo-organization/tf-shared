@@ -8,9 +8,16 @@ terraform {
   }
 }
 
+module "name" {
+  source          = "../_global/modules/naming"
+  key             = var.key
+  global_settings = var.global_settings
+  resource_type   = "azurerm_virtual_network_peering"
+}
+
 # Create virtual network peering to enable communication between VNets
 resource "azurerm_virtual_network_peering" "this" {
-  name                         = var.peering.name
+  name                         = try(var.peering.name, module.name.result)
   resource_group_name          = var.peering.resource_group_name
   virtual_network_name         = var.peering.virtual_network_name
   remote_virtual_network_id    = var.peering.remote_virtual_network_id

@@ -8,9 +8,16 @@ terraform {
   }
 }
 
+module "name" {
+  source          = "../_global/modules/naming"
+  key             = var.key
+  global_settings = var.global_settings
+  resource_type   = "azurerm_lb"
+}
+
 # Create the main Azure Load Balancer resource with specified SKU and frontend IP configurations
 resource "azurerm_lb" "this" {
-  name                = var.load_balancer.name
+  name                = try(var.load_balancer.name, module.name.result)
   location            = var.load_balancer.location
   resource_group_name = var.load_balancer.resource_group_name
   sku                 = var.load_balancer.sku

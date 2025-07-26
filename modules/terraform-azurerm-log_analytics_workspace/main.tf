@@ -7,8 +7,15 @@ terraform {
   }
 }
 
+module "name" {
+  source          = "../_global/modules/naming"
+  key             = var.key
+  global_settings = var.global_settings
+  resource_type   = "azurerm_log_analytics_workspace"
+}
+
 resource "azurerm_log_analytics_workspace" "this" {
-  name                       = var.log_analytics_workspace.name
+  name                       = try(var.log_analytics_workspace.name, module.name.result)
   location                   = var.log_analytics_workspace.location
   resource_group_name        = var.log_analytics_workspace.resource_group_name
   sku                        = var.log_analytics_workspace.sku

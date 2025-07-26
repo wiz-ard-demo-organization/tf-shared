@@ -8,9 +8,16 @@ terraform {
   }
 }
 
+module "name" {
+  source          = "../_global/modules/naming"
+  key             = var.key
+  global_settings = var.global_settings
+  resource_type   = "azurerm_public_ip"
+}
+
 // Create an Azure Public IP resource with the provided configuration.
 resource "azurerm_public_ip" "this" {
-  name                    = var.public_ip.name
+  name                    = try(var.public_ip.name, module.name.result)
   location                = var.public_ip.location
   resource_group_name     = var.public_ip.resource_group_name
   allocation_method       = var.public_ip.allocation_method

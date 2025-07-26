@@ -1,3 +1,15 @@
+variable "key" {
+  type        = string
+  default     = null
+  description = "Identifies the specific resource instance being deployed"
+}
+
+variable "global_settings" {
+  type        = any
+  default     = {}
+  description = "Global configurations for the Azure Landing Zone"
+}
+
 variable "storage_account" {
   description = <<EOT
     storage_account = {

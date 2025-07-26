@@ -8,9 +8,16 @@ terraform {
   }
 }
 
+module "name" {
+  source          = "../_global/modules/naming"
+  key             = var.key
+  global_settings = var.global_settings
+  resource_type   = "azurerm_monitor_diagnostic_setting"
+}
+
 # Create diagnostic settings to send logs and metrics to various destinations for monitoring and compliance
 resource "azurerm_monitor_diagnostic_setting" "this" {
-  name               = var.diagnostic_setting.name
+  name               = try(var.diagnostic_setting.name, module.name.result)
   target_resource_id = var.diagnostic_setting.target_resource_id
 
   # Destination configuration for diagnostic data

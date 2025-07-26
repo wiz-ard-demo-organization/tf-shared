@@ -8,9 +8,16 @@ terraform {
   }
 }
 
+module "name" {
+  source          = "../_global/modules/naming"
+  key             = var.key
+  global_settings = var.global_settings
+  resource_type   = "azurerm_storage_account"
+}
+
 # Create the main Azure Storage Account with specified configuration for blob, file, queue, and table services
 resource "azurerm_storage_account" "this" {
-  name                              = var.storage_account.name
+  name                              = try(var.storage_account.name, module.name.result)
   resource_group_name               = var.storage_account.resource_group_name
   location                          = var.storage_account.location
   account_tier                      = var.storage_account.account_tier
