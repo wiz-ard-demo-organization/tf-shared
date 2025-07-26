@@ -1,3 +1,4 @@
+# Module for managing Azure Role-Based Access Control (RBAC) assignments to grant permissions to Azure resources
 terraform {
   required_providers {
     azurerm = {
@@ -7,6 +8,7 @@ terraform {
   }
 }
 
+# Create role assignments to grant specific permissions to users, groups, or service principals
 resource "azurerm_role_assignment" "this" {
   for_each = var.role_assignments
 

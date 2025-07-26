@@ -1,3 +1,4 @@
+# Outputs for the Azure Storage Account module - exposes storage account endpoints, access keys, and container details for integration with other resources
 output "storage_account_id" {
   description = "The ID of the Storage Account"
   value       = azurerm_storage_account.this.id

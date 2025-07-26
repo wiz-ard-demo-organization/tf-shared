@@ -1,3 +1,4 @@
+# Outputs for the Azure Load Balancer module - exposes key resource IDs and attributes for integration with other resources
 output "load_balancer_id" {
   description = "The ID of the Load Balancer"
   value       = azurerm_lb.this.id

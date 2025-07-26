@@ -1,3 +1,4 @@
+# Outputs for the Azure Diagnostic Settings module - exposes diagnostic configuration IDs and destination details for reference
 output "diagnostic_setting_id" {
   description = "The ID of the Diagnostic Setting"
   value       = azurerm_monitor_diagnostic_setting.this.id

@@ -1,3 +1,4 @@
+# Module for creating and managing Azure Storage Accounts with comprehensive configuration options including blob properties, lifecycle management, and network security rules
 terraform {
   required_providers {
     azurerm = {
@@ -7,6 +8,7 @@ terraform {
   }
 }
 
+# Create the main Azure Storage Account with specified configuration for blob, file, queue, and table services
 resource "azurerm_storage_account" "this" {
   name                              = var.storage_account.name
   resource_group_name               = var.storage_account.resource_group_name
@@ -32,6 +34,7 @@ resource "azurerm_storage_account" "this" {
   sftp_enabled                      = var.storage_account.sftp_enabled
   dns_endpoint_type                 = var.storage_account.dns_endpoint_type
 
+  # Configure custom domain for storage account endpoints
   dynamic "custom_domain" {
     for_each = var.storage_account.custom_domain != null ? [var.storage_account.custom_domain] : []
     content {
@@ -40,6 +43,7 @@ resource "azurerm_storage_account" "this" {
     }
   }
 
+  # Configure customer-managed encryption keys for enhanced security
   dynamic "customer_managed_key" {
     for_each = var.storage_account.customer_managed_key != null ? [var.storage_account.customer_managed_key] : []
     content {
@@ -48,6 +52,7 @@ resource "azurerm_storage_account" "this" {
     }
   }
 
+  # Configure managed identity for the storage account
   dynamic "identity" {
     for_each = var.storage_account.identity != null ? [var.storage_account.identity] : []
     content {
@@ -56,6 +61,7 @@ resource "azurerm_storage_account" "this" {
     }
   }
 
+  # Configure blob service properties including versioning, change feed, and lifecycle policies
   dynamic "blob_properties" {
     for_each = var.storage_account.blob_properties != null ? [var.storage_account.blob_properties] : []
     content {
@@ -65,6 +71,7 @@ resource "azurerm_storage_account" "this" {
       default_service_version  = blob_properties.value.default_service_version
       last_access_time_enabled = blob_properties.value.last_access_time_enabled
 
+      # Configure CORS rules for blob service
       dynamic "cors_rule" {
         for_each = blob_properties.value.cors_rule != null ? blob_properties.value.cors_rule : []
         content {
@@ -76,6 +83,7 @@ resource "azurerm_storage_account" "this" {
         }
       }
 
+      # Configure soft delete retention policy for blobs
       dynamic "delete_retention_policy" {
         for_each = blob_properties.value.delete_retention_policy != null ? [blob_properties.value.delete_retention_policy] : []
         content {
@@ -83,6 +91,7 @@ resource "azurerm_storage_account" "this" {
         }
       }
 
+      # Configure point-in-time restore capability
       dynamic "restore_policy" {
         for_each = blob_properties.value.restore_policy != null ? [blob_properties.value.restore_policy] : []
         content {
@@ -90,6 +99,7 @@ resource "azurerm_storage_account" "this" {
         }
       }
 
+      # Configure soft delete retention policy for containers
       dynamic "container_delete_retention_policy" {
         for_each = blob_properties.value.container_delete_retention_policy != null ? [blob_properties.value.container_delete_retention_policy] : []
         content {
@@ -99,9 +109,11 @@ resource "azurerm_storage_account" "this" {
     }
   }
 
+  # Configure queue service properties including logging and metrics
   dynamic "queue_properties" {
     for_each = var.storage_account.queue_properties != null ? [var.storage_account.queue_properties] : []
     content {
+      # Configure CORS rules for queue service
       dynamic "cors_rule" {
         for_each = queue_properties.value.cors_rule != null ? queue_properties.value.cors_rule : []
         content {
@@ -113,6 +125,7 @@ resource "azurerm_storage_account" "this" {
         }
       }
 
+      # Configure logging for queue operations
       dynamic "logging" {
         for_each = queue_properties.value.logging != null ? [queue_properties.value.logging] : []
         content {
@@ -124,6 +137,7 @@ resource "azurerm_storage_account" "this" {
         }
       }
 
+      # Configure minute-level metrics for queue service
       dynamic "minute_metrics" {
         for_each = queue_properties.value.minute_metrics != null ? [queue_properties.value.minute_metrics] : []
         content {
@@ -134,6 +148,7 @@ resource "azurerm_storage_account" "this" {
         }
       }
 
+      # Configure hour-level metrics for queue service
       dynamic "hour_metrics" {
         for_each = queue_properties.value.hour_metrics != null ? [queue_properties.value.hour_metrics] : []
         content {
@@ -146,6 +161,7 @@ resource "azurerm_storage_account" "this" {
     }
   }
 
+  # Configure static website hosting capabilities
   dynamic "static_website" {
     for_each = var.storage_account.static_website != null ? [var.storage_account.static_website] : []
     content {
@@ -154,9 +170,11 @@ resource "azurerm_storage_account" "this" {
     }
   }
 
+  # Configure file share properties including SMB settings
   dynamic "share_properties" {
     for_each = var.storage_account.share_properties != null ? [var.storage_account.share_properties] : []
     content {
+      # Configure CORS rules for file service
       dynamic "cors_rule" {
         for_each = share_properties.value.cors_rule != null ? share_properties.value.cors_rule : []
         content {
@@ -168,6 +186,7 @@ resource "azurerm_storage_account" "this" {
         }
       }
 
+      # Configure soft delete retention policy for file shares
       dynamic "retention_policy" {
         for_each = share_properties.value.retention_policy != null ? [share_properties.value.retention_policy] : []
         content {
@@ -175,6 +194,7 @@ resource "azurerm_storage_account" "this" {
         }
       }
 
+      # Configure SMB protocol settings for file shares
       dynamic "smb" {
         for_each = share_properties.value.smb != null ? [share_properties.value.smb] : []
         content {
@@ -188,6 +208,7 @@ resource "azurerm_storage_account" "this" {
     }
   }
 
+  # Configure network access rules and firewall settings
   dynamic "network_rules" {
     for_each = var.storage_account.network_rules != null ? [var.storage_account.network_rules] : []
     content {
@@ -196,6 +217,7 @@ resource "azurerm_storage_account" "this" {
       ip_rules                   = network_rules.value.ip_rules
       virtual_network_subnet_ids = network_rules.value.virtual_network_subnet_ids
 
+      # Configure private endpoint connections
       dynamic "private_link_access" {
         for_each = network_rules.value.private_link_access != null ? network_rules.value.private_link_access : []
         content {
@@ -206,11 +228,13 @@ resource "azurerm_storage_account" "this" {
     }
   }
 
+  # Configure Azure Files authentication with Active Directory
   dynamic "azure_files_authentication" {
     for_each = var.storage_account.azure_files_authentication != null ? [var.storage_account.azure_files_authentication] : []
     content {
       directory_type = azure_files_authentication.value.directory_type
 
+      # Configure on-premises Active Directory integration
       dynamic "active_directory" {
         for_each = azure_files_authentication.value.active_directory != null ? [azure_files_authentication.value.active_directory] : []
         content {
@@ -225,6 +249,7 @@ resource "azurerm_storage_account" "this" {
     }
   }
 
+  # Configure routing preferences for data traffic
   dynamic "routing" {
     for_each = var.storage_account.routing != null ? [var.storage_account.routing] : []
     content {
@@ -234,6 +259,7 @@ resource "azurerm_storage_account" "this" {
     }
   }
 
+  # Configure immutability policy for compliance requirements
   dynamic "immutability_policy" {
     for_each = var.storage_account.immutability_policy != null ? [var.storage_account.immutability_policy] : []
     content {
@@ -243,6 +269,7 @@ resource "azurerm_storage_account" "this" {
     }
   }
 
+  # Configure SAS token policy settings
   dynamic "sas_policy" {
     for_each = var.storage_account.sas_policy != null ? [var.storage_account.sas_policy] : []
     content {
@@ -254,7 +281,7 @@ resource "azurerm_storage_account" "this" {
   tags = var.tags
 }
 
-# Storage Containers
+# Storage Containers - Create blob containers within the storage account
 resource "azurerm_storage_container" "this" {
   for_each = var.storage_containers
 
@@ -264,7 +291,7 @@ resource "azurerm_storage_container" "this" {
   metadata              = each.value.metadata
 }
 
-# Storage Management Policy (Lifecycle Rules)
+# Storage Management Policy - Configure lifecycle management rules for automatic blob tiering and deletion
 resource "azurerm_storage_management_policy" "this" {
   count = var.lifecycle_management != null ? 1 : 0
 
@@ -276,10 +303,12 @@ resource "azurerm_storage_management_policy" "this" {
       name    = rule.value.name
       enabled = rule.value.enabled
 
+      # Define filters to target specific blobs
       filters {
         prefix_match = rule.value.filters.prefix_match
         blob_types   = rule.value.filters.blob_types
 
+        # Match blobs based on index tags
         dynamic "match_blob_index_tag" {
           for_each = rule.value.filters.match_blob_index_tag != null ? rule.value.filters.match_blob_index_tag : []
           content {
@@ -290,7 +319,9 @@ resource "azurerm_storage_management_policy" "this" {
         }
       }
 
+      # Define actions to perform on matched blobs
       actions {
+        # Actions for base blobs
         dynamic "base_blob" {
           for_each = rule.value.actions.base_blob != null ? [rule.value.actions.base_blob] : []
           content {
@@ -304,6 +335,7 @@ resource "azurerm_storage_management_policy" "this" {
           }
         }
 
+        # Actions for blob snapshots
         dynamic "snapshot" {
           for_each = rule.value.actions.snapshot != null ? [rule.value.actions.snapshot] : []
           content {
@@ -313,6 +345,7 @@ resource "azurerm_storage_management_policy" "this" {
           }
         }
 
+        # Actions for blob versions
         dynamic "version" {
           for_each = rule.value.actions.version != null ? [rule.value.actions.version] : []
           content {
