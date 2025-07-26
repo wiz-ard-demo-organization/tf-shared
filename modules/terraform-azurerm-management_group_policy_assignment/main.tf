@@ -72,13 +72,11 @@ resource "azurerm_management_group_policy_assignment" "this" {
   dynamic "overrides" {
     for_each = var.policy_assignment.overrides != null ? var.policy_assignment.overrides : []
     content {
-      kind  = overrides.value.kind
       value = overrides.value.value
       
       dynamic "selector" {
         for_each = overrides.value.selectors != null ? overrides.value.selectors : []
         content {
-          kind   = selector.value.kind
           in     = selector.value.in
           not_in = selector.value.not_in
         }

@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		},
+		{
+			"path": "../../../tf-plat-management"
+		},
+		{
+			"path": "../../../tf-plat-connectivity"
+		}
+	],
+	"settings": {}
+}

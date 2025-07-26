@@ -29,7 +29,7 @@ resource "azurerm_log_analytics_workspace" "this" {
   # Network and security settings
   internet_ingestion_enabled = var.log_analytics_workspace.internet_ingestion_enabled
   internet_query_enabled     = var.log_analytics_workspace.internet_query_enabled
-  local_authentication_disabled = var.log_analytics_workspace.local_authentication_disabled
+  local_authentication_enabled = var.log_analytics_workspace.local_authentication_enabled
   
   # Data management configuration
   data_collection_rule_id    = var.log_analytics_workspace.data_collection_rule_id
@@ -46,78 +46,4 @@ resource "azurerm_log_analytics_workspace" "this" {
   }
 
   tags = var.tags
-}
-
-# Deploy Log Analytics Solutions for specific monitoring scenarios
-resource "azurerm_log_analytics_solution" "this" {
-  for_each = var.log_analytics_solutions
-
-  solution_name         = each.value.solution_name
-  location              = var.log_analytics_workspace.location
-  resource_group_name   = var.log_analytics_workspace.resource_group_name
-  workspace_resource_id = azurerm_log_analytics_workspace.this.id
-  workspace_name        = azurerm_log_analytics_workspace.this.name
-
-  # Solution plan configuration
-  plan {
-    publisher = each.value.plan.publisher
-    product   = each.value.plan.product
-  }
-
-  tags = var.tags
-}
-
-# Configure data export rules to send logs to external destinations
-resource "azurerm_log_analytics_data_export_rule" "this" {
-  for_each = var.data_export_rules
-
-  name                    = each.value.name
-  resource_group_name     = var.log_analytics_workspace.resource_group_name
-  workspace_resource_id   = azurerm_log_analytics_workspace.this.id
-  destination_resource_id = each.value.destination_resource_id
-  table_names             = each.value.table_names
-  enabled                 = each.value.enabled
-}
-
-# Create saved searches for frequently used queries
-resource "azurerm_log_analytics_saved_search" "this" {
-  for_each = var.saved_searches
-
-  name                       = each.value.name
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.this.id
-  category                   = each.value.category
-  display_name               = each.value.display_name
-  query                      = each.value.query
-  function_alias             = each.value.function_alias
-  function_parameters        = each.value.function_parameters
-
-  tags = var.tags
-}
-
-# Create query packs for organizing and sharing queries
-resource "azurerm_log_analytics_query_pack" "this" {
-  for_each = var.query_packs
-
-  name                = each.value.name
-  location            = var.log_analytics_workspace.location
-  resource_group_name = var.log_analytics_workspace.resource_group_name
-
-  tags = var.tags
-}
-
-# Add queries to query packs for reusable analysis
-resource "azurerm_log_analytics_query_pack_query" "this" {
-  for_each = var.query_pack_queries
-
-  query_pack_id   = azurerm_log_analytics_query_pack.this[each.value.query_pack_key].id
-  body            = each.value.body
-  display_name    = each.value.display_name
-  name            = each.value.name
-  description     = each.value.description
-  categories      = each.value.categories
-  resource_types  = each.value.resource_types
-  solutions       = each.value.solutions
-  tags            = each.value.tags
-
-  additional_settings_json = each.value.additional_settings_json
 } 

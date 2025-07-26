@@ -28,7 +28,6 @@ resource "azurerm_mssql_server" "this" {
   # Security settings
   minimum_tls_version          = var.sql_server.minimum_tls_version
   public_network_access_enabled = var.sql_server.public_network_access_enabled
-  outbound_network_access_restricted = var.sql_server.outbound_network_access_restricted
   connection_policy            = var.sql_server.connection_policy
   transparent_data_encryption_key_vault_key_id = var.sql_server.transparent_data_encryption_key_vault_key_id
 
@@ -132,6 +131,7 @@ resource "azurerm_mssql_database" "this" {
   dynamic "import" {
     for_each = each.value.import != null ? [each.value.import] : []
     content {
+      authentication_type         = import.value.authentication_type
       storage_uri                  = import.value.storage_uri
       storage_key                  = import.value.storage_key
       storage_key_type            = import.value.storage_key_type

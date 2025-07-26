@@ -59,10 +59,8 @@ variable "policy_assignment" {
     })))
 
     overrides = optional(list(object({
-      kind  = string
       value = string
       selectors = optional(list(object({
-        kind   = string
         in     = optional(list(string))
         not_in = optional(list(string))
       })))
@@ -103,10 +101,5 @@ variable "policy_assignment" {
     error_message = "resource_selector kind must be one of: 'resourceLocation', 'resourceType', or 'resourceWithoutLocation'."
   }
 
-  validation {
-    condition = var.policy_assignment.overrides == null || alltrue([
-      for o in var.policy_assignment.overrides : contains(["policyEffect"], o.kind)
-    ])
-    error_message = "override kind must be 'policyEffect'."
-  }
+
 }
