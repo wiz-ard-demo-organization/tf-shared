@@ -5,28 +5,33 @@ output "virtual_network" {
 }
 
 output "id" {
-  description = "The ID of the Virtual Network"
   value       = azurerm_virtual_network.this.id
+  description = "The virtual network ID"
 }
 
 output "name" {
-  description = "The name of the Virtual Network"
   value       = azurerm_virtual_network.this.name
-}
-
-output "guid" {
-  description = "The GUID of the Virtual Network"
-  value       = azurerm_virtual_network.this.guid
+  description = "The name of the virtual network"
 }
 
 output "location" {
-  description = "The Azure Region where the Virtual Network exists"
   value       = azurerm_virtual_network.this.location
+  description = "The location/region where the virtual network is created"
+}
+
+output "resource_group_name" {
+  value       = azurerm_virtual_network.this.resource_group_name
+  description = "The name of the resource group in which the virtual network is created"
 }
 
 output "address_space" {
-  description = "The address space of the Virtual Network"
   value       = azurerm_virtual_network.this.address_space
+  description = "The address space that is used by the virtual network"
+}
+
+output "guid" {
+  value       = azurerm_virtual_network.this.guid
+  description = "The GUID of the virtual network"
 }
 
  

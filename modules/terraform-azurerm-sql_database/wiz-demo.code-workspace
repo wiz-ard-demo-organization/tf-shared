@@ -10,5 +10,7 @@
 			"path": "../../../tf-plat-connectivity"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"powershell.cwd": "tf-plat-management"
+	}
 }

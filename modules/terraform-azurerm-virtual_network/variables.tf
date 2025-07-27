@@ -4,16 +4,40 @@ variable "key" {
   description = "Identifies the specific resource instance being deployed"
 }
 
+variable "settings" {
+  type        = any
+  default     = {}
+  description = "Provides the configuration values for the specific resources being deployed"
+}
+
 variable "global_settings" {
   type        = any
   default     = {}
   description = "Global configurations for the Azure Landing Zone"
 }
 
+variable "client_config" {
+  type        = any
+  default     = null
+  description = "Data source to access the configurations of the Azurerm provider"
+}
+
+variable "remote_states" {
+  type        = any
+  default     = {}
+  description = "Outputs from the previous deployments that are stored in additional Terraform State Files"
+}
+
+variable "resource_groups" {
+  type        = any
+  default     = {}
+  description = "Resource Groups previously created and being referenced with an Instance key"
+}
+
 variable "virtual_network" {
   description = <<EOT
     virtual_network = {
-      name : "(Required) The name of the virtual network. Changing this forces a new resource to be created."
+      name : "(Optional) The name of the virtual network. If not provided, will be generated using naming module."
       location : "(Required) The location/region where the virtual network is created. Changing this forces a new resource to be created."
       resource_group_name : "(Required) The name of the resource group in which to create the virtual network. Changing this forces a new resource to be created."
       address_space : "(Required) The address space that is used by the virtual network. You can supply more than one address space."
@@ -27,13 +51,13 @@ variable "virtual_network" {
       }
       encryption : (Optional) An encryption block. {
         enforcement : "(Required) Specifies if the encrypted Virtual Network allows VM that does not support encryption. Possible values are DropUnencrypted and AllowUnencrypted."
-      }
+  }
     }
   EOT
   type = object({
     name                    = optional(string)
-    location                = string
-    resource_group_name     = string
+    location                = optional(string)
+    resource_group_name     = optional(string)
     address_space           = list(string)
     dns_servers             = optional(list(string))
     edge_zone               = optional(string)
@@ -49,19 +73,20 @@ variable "virtual_network" {
       enforcement = string
     }))
   })
+  default = null
 
   validation {
-    condition = length(var.virtual_network.address_space) > 0
+    condition = var.virtual_network == null || length(var.virtual_network.address_space) > 0
     error_message = "At least one address space must be specified for the virtual network."
   }
 
   validation {
-    condition = var.virtual_network.encryption == null || contains(["AllowUnencrypted", "DropUnencrypted"], var.virtual_network.encryption.enforcement)
+    condition = var.virtual_network == null || var.virtual_network.encryption == null || contains(["AllowUnencrypted", "DropUnencrypted"], var.virtual_network.encryption.enforcement)
     error_message = "Encryption enforcement must be either 'AllowUnencrypted' or 'DropUnencrypted'."
   }
 
   validation {
-    condition = var.virtual_network.flow_timeout_in_minutes == null || (var.virtual_network.flow_timeout_in_minutes >= 4 && var.virtual_network.flow_timeout_in_minutes <= 30)
+    condition = var.virtual_network == null || var.virtual_network.flow_timeout_in_minutes == null || (var.virtual_network.flow_timeout_in_minutes >= 4 && var.virtual_network.flow_timeout_in_minutes <= 30)
     error_message = "flow_timeout_in_minutes must be between 4 and 30 minutes."
   }
 }
@@ -69,4 +94,5 @@ variable "virtual_network" {
 variable "tags" {
   description = "(Optional) A mapping of tags to assign to all resources created by this module."
   type        = map(string)
+  default     = {}
 } 

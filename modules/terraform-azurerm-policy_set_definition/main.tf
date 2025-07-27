@@ -18,40 +18,40 @@ module "name" {
 
 # Create Azure Policy Set Definition (Initiative) to group multiple policy definitions for governance and compliance frameworks
 resource "azurerm_policy_set_definition" "this" {
-  name                = try(var.policy_set_definition.name, module.name.result)
-  policy_type         = var.policy_set_definition.policy_type
-  display_name        = var.policy_set_definition.display_name
-  description         = var.policy_set_definition.description
-  management_group_id = var.policy_set_definition.management_group_id != null ? "/providers/Microsoft.Management/ManagementGroups/${var.policy_set_definition.management_group_id}" : null
+  name                = try(var.settings.name, var.policy_set_definition.name, module.name.result)
+  policy_type         = try(var.settings.policy_type, var.policy_set_definition.policy_type)
+  display_name        = try(var.settings.display_name, var.policy_set_definition.display_name)
+  description         = try(var.settings.description, var.policy_set_definition.description)
+  management_group_id = try(var.settings.management_group_id, var.policy_set_definition.management_group_id) != null ? "/providers/Microsoft.Management/ManagementGroups/${try(var.settings.management_group_id, var.policy_set_definition.management_group_id)}" : null
   
   # Set metadata for the policy set definition, defaulting to standard regulatory compliance category
-  metadata = var.policy_set_definition.metadata != null ? var.policy_set_definition.metadata : jsonencode({
-    category = var.policy_set_definition.metadata_category
+  metadata = try(var.settings.metadata, null) != null ? var.settings.metadata : try(var.policy_set_definition.metadata, null) != null ? var.policy_set_definition.metadata : jsonencode({
+    category = try(var.settings.metadata_category, try(var.policy_set_definition.metadata_category, "Regulatory Compliance"))
   })
 
   # Load parameters from external file if specified, otherwise use inline parameters
-  parameters = var.policy_set_definition.parameters_file_path != null ? file(var.policy_set_definition.parameters_file_path) : var.policy_set_definition.parameters
+  parameters = try(var.settings.parameters_file_path, null) != null ? file(var.settings.parameters_file_path) : try(var.policy_set_definition.parameters_file_path, null) != null ? file(var.policy_set_definition.parameters_file_path) : try(var.settings.parameters, try(var.policy_set_definition.parameters, null))
 
   # Create policy definition references for each policy in the initiative
   dynamic "policy_definition_reference" {
-    for_each = var.policy_set_definition.policy_definition_references
+    for_each = try(var.settings.policy_definition_references, try(var.policy_set_definition.policy_definition_references, []))
     content {
       policy_definition_id = policy_definition_reference.value.policy_definition_id
-      parameter_values     = policy_definition_reference.value.parameter_values != null ? jsonencode(policy_definition_reference.value.parameter_values) : null
-      reference_id         = policy_definition_reference.value.reference_id
-      policy_group_names   = policy_definition_reference.value.policy_group_names
+      parameter_values     = try(policy_definition_reference.value.parameter_values, null) != null ? jsonencode(policy_definition_reference.value.parameter_values) : null
+      reference_id         = try(policy_definition_reference.value.reference_id, null)
+      policy_group_names   = try(policy_definition_reference.value.policy_group_names, null)
     }
   }
 
   # Create policy groups for organizing policies within the initiative
   dynamic "policy_definition_group" {
-    for_each = var.policy_set_definition.policy_definition_groups != null ? var.policy_set_definition.policy_definition_groups : []
+    for_each = try(var.settings.policy_definition_groups, try(var.policy_set_definition.policy_definition_groups, []))
     content {
       name                            = policy_definition_group.value.name
-      display_name                    = policy_definition_group.value.display_name
-      category                        = policy_definition_group.value.category
-      description                     = policy_definition_group.value.description
-      additional_metadata_resource_id = policy_definition_group.value.additional_metadata_resource_id
+      display_name                    = try(policy_definition_group.value.display_name, null)
+      category                        = try(policy_definition_group.value.category, null)
+      description                     = try(policy_definition_group.value.description, null)
+      additional_metadata_resource_id = try(policy_definition_group.value.additional_metadata_resource_id, null)
     }
   }
 }

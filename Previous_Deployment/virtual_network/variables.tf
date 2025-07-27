@@ -15,7 +15,6 @@ variable "global_settings" {
   default     = {}
   description = "Global configurations for the Azure Landing Zone"
 }
-
 variable "client_config" {
   type        = any
   default     = null
@@ -28,22 +27,20 @@ variable "remote_states" {
   description = "Outputs from the previous deployments that are stored in additional Terraform State Files"
 }
 
-variable "resource_group" {
-  description = <<EOT
-    resource_group = {
-      name : "(Optional) The name of the resource group. If not provided, will be generated using naming module."
-      location : "(Required) The Azure Region where the resource group should exist."
-    }
-  EOT
-  type = object({
-    name     = optional(string)
-    location = string
-  })
-  default = null
+variable "resource_groups" {
+  type        = any
+  default     = {}
+  description = "Resource Groups previously created and being referenced with an Instance key"
 }
 
-variable "tags" {
-  description = "(Optional) A mapping of tags to assign to the resource group."
-  type        = map(string)
+variable "network_security_groups" {
+  type        = any
   default     = {}
-} 
+  description = "Network Security Groups previously created and being referenced with an Instance key"
+}
+
+variable "route_tables" {
+  type        = any
+  default     = {}
+  description = "Route Tables previously created and being referenced with an Instance key"
+}

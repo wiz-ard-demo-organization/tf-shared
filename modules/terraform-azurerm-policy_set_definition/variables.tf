@@ -4,10 +4,28 @@ variable "key" {
   description = "Identifies the specific resource instance being deployed"
 }
 
+variable "settings" {
+  type        = any
+  default     = {}
+  description = "Provides the configuration values for the specific resources being deployed"
+}
+
 variable "global_settings" {
   type        = any
   default     = {}
   description = "Global configurations for the Azure Landing Zone"
+}
+
+variable "client_config" {
+  type        = any
+  default     = null
+  description = "Data source to access the configurations of the Azurerm provider"
+}
+
+variable "remote_states" {
+  type        = any
+  default     = {}
+  description = "Outputs from the previous deployments that are stored in additional Terraform State Files"
 }
 
 variable "policy_set_definition" {
@@ -52,24 +70,25 @@ variable "policy_set_definition" {
       additional_metadata_resource_id = optional(string)
     })))
   })
+  default = null
 
   validation {
-    condition = contains(["BuiltIn", "Custom", "NotSpecified", "Static"], var.policy_set_definition.policy_type)
+    condition = var.policy_set_definition == null || contains(["BuiltIn", "Custom", "NotSpecified", "Static"], var.policy_set_definition.policy_type)
     error_message = "Policy type must be one of: 'BuiltIn', 'Custom', 'NotSpecified', or 'Static'."
   }
 
   validation {
-    condition = !(var.policy_set_definition.parameters != null && var.policy_set_definition.parameters_file_path != null)
+    condition = var.policy_set_definition == null || !(var.policy_set_definition.parameters != null && var.policy_set_definition.parameters_file_path != null)
     error_message = "Cannot specify both parameters and parameters_file_path. Choose one."
   }
 
   validation {
-    condition = length(var.policy_set_definition.policy_definition_references) > 0
+    condition = var.policy_set_definition == null || length(var.policy_set_definition.policy_definition_references) > 0
     error_message = "At least one policy definition reference must be specified."
   }
 
   validation {
-    condition = alltrue([
+    condition = var.policy_set_definition == null || alltrue([
       for ref in var.policy_set_definition.policy_definition_references : 
       can(regex("^/.*", ref.policy_definition_id))
     ])
