@@ -16,11 +16,11 @@ variable "route_table" {
       name : "(Required) The name of the route table. Changing this forces a new resource to be created."
       location : "(Required) Specifies the supported Azure location where the resource exists. Changing this forces a new resource to be created."
       resource_group_name : "(Required) The name of the resource group in which to create the route table. Changing this forces a new resource to be created."
-      disable_bgp_route_propagation : "(Optional) Boolean flag which controls propagation of routes learned by BGP on that route table. True means disable. Defaults to false."
+      disable_bgp_route_propagation : "(Optional) Boolean flag which controls propagation of routes learned by BGP on that route table. True means disable. Defaults to false. Note: This parameter is converted to bgp_route_propagation_enabled (inverted) to use the current AzureRM provider parameter."
     }
   EOT
   type = object({
-    name                          = string
+    name                          = optional(string)
     location                      = string
     resource_group_name           = string
     disable_bgp_route_propagation = optional(bool, false)

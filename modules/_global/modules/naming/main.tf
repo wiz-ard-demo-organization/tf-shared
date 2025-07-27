@@ -1,17 +1,62 @@
 locals {
-  default_separator         = "-"
-  default_key_split         = try(split("_", var.key)[0], null)
-  default_instance_version  = try(split("_", var.key)[1], "001")
-  default_location          = try(var.settings.location_code, var.global_settings.location_code, null)
-  default_application_code  = try(var.global_settings.application_code, null)
-  default_environment_code  = try(var.global_settings.environment_code, null)
-  default_organization_code = can(local.resource_type.organization_code) ? var.global_settings.organization_code : null
-  resource_type             = try(local.resource_types[var.resource_type], null)
-  separator                 = try(local.resource_type.separator, local.default_separator)
-  slug                      = try(local.resource_type.slug, null)
-  suffixes                  = compact([local.default_application_code, local.default_organization_code, local.default_key_split, local.default_environment_code, local.default_location, local.default_instance_version])
-  resource_name = try(
-    join(local.separator, compact(concat([local.slug], local.suffixes))),
-    null
-  )
+  # Simple naming logic
+  resource_types = {
+    azuread_application = {
+      slug = "sp"
+    }
+    azurerm_resource_group = {
+      slug = "rg"
+    }
+    azurerm_storage_account = {
+      separator         = ""
+      organization_code = true
+      slug              = "sa"
+    }
+    azurerm_key_vault = {
+      separator         = ""
+      organization_code = true
+      slug              = "kv"
+    }
+    azurerm_log_analytics_workspace = {
+      slug = "log"
+    }
+    azurerm_role_assignment = {
+      slug = "ra"
+    }
+    azurerm_virtual_network = {
+      slug = "vnet"
+    }
+    azurerm_subnet = {
+      slug = "snet"
+    }
+    azurerm_network_security_group = {
+      slug = "nsg"
+    }
+    azurerm_route_table = {
+      slug = "rt"
+    }
+    azurerm_virtual_network_peering = {
+      slug = "peer"
+    }
+    azurerm_network_interface = {
+      slug = "nic"
+    }
+    azurerm_public_ip = {
+      slug = "pip"
+    }
+    azurerm_linux_virtual_machine = {
+      slug = "vm"
+    }
+  }
+  
+  # Build the name components
+  slug = local.resource_types[var.resource_type].slug
+  app_code = var.global_settings.prefix
+  env_code = var.global_settings.environment  
+  location_code = var.global_settings.region
+  key_part = var.key
+  instance = "001"
+  
+  # Generate the resource name
+  resource_name = "${local.slug}-${local.app_code}-${local.key_part}-${local.env_code}-${local.location_code}-${local.instance}"
 }

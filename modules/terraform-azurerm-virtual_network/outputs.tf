@@ -4,9 +4,29 @@ output "virtual_network" {
   value       = azurerm_virtual_network.this
 }
 
-output "subnets" {
-  description = "Map of subnets"
-  value = {
-    for k, v in azurerm_subnet.this : k => v
-  }
-} 
+output "id" {
+  description = "The ID of the Virtual Network"
+  value       = azurerm_virtual_network.this.id
+}
+
+output "name" {
+  description = "The name of the Virtual Network"
+  value       = azurerm_virtual_network.this.name
+}
+
+output "guid" {
+  description = "The GUID of the Virtual Network"
+  value       = azurerm_virtual_network.this.guid
+}
+
+output "location" {
+  description = "The Azure Region where the Virtual Network exists"
+  value       = azurerm_virtual_network.this.location
+}
+
+output "address_space" {
+  description = "The address space of the Virtual Network"
+  value       = azurerm_virtual_network.this.address_space
+}
+
+ 

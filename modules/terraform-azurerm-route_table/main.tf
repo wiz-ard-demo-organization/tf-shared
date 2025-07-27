@@ -16,10 +16,10 @@ module "name" {
 }
 
 resource "azurerm_route_table" "this" {
-  name                          = try(var.route_table.name, module.name.result)
+  name                          = module.name.result
   location                      = var.route_table.location
   resource_group_name           = var.route_table.resource_group_name
-  disable_bgp_route_propagation = var.route_table.disable_bgp_route_propagation
+  bgp_route_propagation_enabled = !var.route_table.disable_bgp_route_propagation
 
   tags = var.tags
 }
