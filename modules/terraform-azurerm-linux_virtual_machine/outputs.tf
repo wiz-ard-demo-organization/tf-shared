@@ -10,5 +10,5 @@ output "network_interface" {
 
 output "public_ip" {
   description = "The Public IP resource"
-  value = var.linux_virtual_machine.create_public_ip ? azurerm_public_ip.this[0] : null
+  value = try(var.settings.create_public_ip, var.linux_virtual_machine != null ? var.linux_virtual_machine.create_public_ip : false, false) ? azurerm_public_ip.this[0] : null
 } 

@@ -4,29 +4,51 @@ variable "key" {
   description = "Identifies the specific resource instance being deployed"
 }
 
+variable "settings" {
+  type        = any
+  default     = {}
+  description = "Provides the configuration values for the specific resources being deployed"
+}
+
 variable "global_settings" {
   type        = any
   default     = {}
   description = "Global configurations for the Azure Landing Zone"
 }
 
+variable "client_config" {
+  type        = any
+  default     = null
+  description = "Data source to access the configurations of the Azurerm provider"
+}
+
+variable "remote_states" {
+  type        = any
+  default     = {}
+  description = "Outputs from the previous deployments that are stored in additional Terraform State Files"
+}
+
+variable "resource_groups" {
+  type        = any
+  default     = {}
+  description = "Resource Groups previously created and being referenced with an Instance key"
+}
+
 variable "kubernetes_cluster" {
   description = "Configuration for the Azure Kubernetes Service cluster"
   type = object({
-    name                                = string
-    location                            = string
-    resource_group_name                 = string
+    name                                = optional(string)
+    location                            = optional(string)
+    resource_group_name                 = optional(string)
     dns_prefix                          = optional(string)
     dns_prefix_private_cluster          = optional(string)
     kubernetes_version                  = optional(string)
     sku_tier                            = optional(string, "Free")
-    api_server_authorized_ip_ranges     = optional(set(string))
     node_resource_group                 = optional(string)
     disk_encryption_set_id              = optional(string)
     private_cluster_enabled             = optional(bool, false)
     private_dns_zone_id                 = optional(string)
     private_cluster_public_fqdn_enabled = optional(bool, false)
-    public_network_access_enabled       = optional(bool, true)
     role_based_access_control_enabled   = optional(bool, true)
     local_account_disabled              = optional(bool, false)
     automatic_channel_upgrade           = optional(string)
@@ -40,7 +62,7 @@ variable "kubernetes_cluster" {
     support_plan                        = optional(string)
     node_os_channel_upgrade             = optional(string)
 
-    default_node_pool = object({
+    default_node_pool = optional(object({
       name                         = string
       node_count                   = optional(number)
       vm_size                      = string
@@ -53,7 +75,6 @@ variable "kubernetes_cluster" {
       os_disk_size_gb              = optional(number)
       os_disk_type                 = optional(string, "Managed")
       ultra_ssd_enabled            = optional(bool, false)
-      node_public_ip_enabled       = optional(bool, false)
       node_public_ip_prefix_id     = optional(string)
       enable_host_encryption       = optional(bool, false)
       enable_node_public_ip        = optional(bool, false)
@@ -71,9 +92,7 @@ variable "kubernetes_cluster" {
       capacity_reservation_group_id = optional(string)
       fips_enabled                 = optional(bool, false)
       gpu_instance_profile         = optional(string)
-      message_of_the_day           = optional(string)
       node_labels                  = optional(map(string))
-      node_taints                  = optional(list(string))
 
       kubelet_config = optional(object({
         allowed_unsafe_sysctls    = optional(list(string))
@@ -136,23 +155,13 @@ variable "kubernetes_cluster" {
         node_soak_duration_in_minutes = optional(number)
         max_surge                     = string
       }))
-    })
+    }))
 
     network_profile = optional(object({
       network_plugin      = string
-      network_mode        = optional(string)
       network_policy      = optional(string)
       dns_service_ip      = optional(string)
-      outbound_type       = optional(string, "loadBalancer")
-      pod_cidr            = optional(string)
-      pod_cidrs           = optional(list(string))
       service_cidr        = optional(string)
-      service_cidrs       = optional(list(string))
-      ip_versions         = optional(list(string))
-      load_balancer_sku   = optional(string, "standard")
-      network_plugin_mode = optional(string)
-      network_data_plane  = optional(string)
-      ebpf_data_plane     = optional(string)
 
       load_balancer_profile = optional(object({
         idle_timeout_in_minutes     = optional(number)
@@ -201,12 +210,9 @@ variable "kubernetes_cluster" {
 
     api_server_access_profile = optional(object({
       authorized_ip_ranges     = optional(set(string))
-      vnet_integration_enabled = optional(bool, false)
-      subnet_id                = optional(string)
     }))
 
     azure_active_directory_role_based_access_control = optional(object({
-      managed                = optional(bool, true)
       tenant_id              = optional(string)
       admin_group_object_ids = optional(list(string))
       azure_rbac_enabled     = optional(bool, false)
@@ -312,13 +318,11 @@ variable "kubernetes_cluster" {
     storage_profile = optional(object({
       blob_driver_enabled         = optional(bool, false)
       disk_driver_enabled         = optional(bool, true)
-      disk_driver_version         = optional(string, "v1")
       file_driver_enabled         = optional(bool, true)
       snapshot_controller_enabled = optional(bool, true)
     }))
 
     web_app_routing = optional(object({
-      dns_zone_id = optional(string)
       dns_zone_ids = optional(list(string))
       web_app_routing_identity = optional(list(object({
         client_id                       = string
@@ -338,14 +342,15 @@ variable "kubernetes_cluster" {
       external_ingress_gateway_enabled = optional(bool, false)
     }))
   })
+  default = null
 
   validation {
-    condition = var.kubernetes_cluster.dns_prefix != null || var.kubernetes_cluster.dns_prefix_private_cluster != null
+    condition = var.kubernetes_cluster == null || (var.kubernetes_cluster.dns_prefix != null || var.kubernetes_cluster.dns_prefix_private_cluster != null)
     error_message = "Either dns_prefix or dns_prefix_private_cluster must be specified."
   }
 
   validation {
-    condition = var.kubernetes_cluster.identity != null || var.kubernetes_cluster.service_principal != null
+    condition = var.kubernetes_cluster == null || (var.kubernetes_cluster.identity != null || var.kubernetes_cluster.service_principal != null)
     error_message = "Either identity or service_principal must be configured."
   }
 }
@@ -353,4 +358,5 @@ variable "kubernetes_cluster" {
 variable "tags" {
   description = "A mapping of tags to assign to all resources"
   type        = map(string)
+  default     = {}
 } 

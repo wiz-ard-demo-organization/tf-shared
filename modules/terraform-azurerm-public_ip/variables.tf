@@ -4,10 +4,34 @@ variable "key" {
   description = "Identifies the specific resource instance being deployed"
 }
 
+variable "settings" {
+  type        = any
+  default     = {}
+  description = "Provides the configuration values for the specific resources being deployed"
+}
+
 variable "global_settings" {
   type        = any
   default     = {}
   description = "Global configurations for the Azure Landing Zone"
+}
+
+variable "client_config" {
+  type        = any
+  default     = null
+  description = "Data source to access the configurations of the Azurerm provider"
+}
+
+variable "remote_states" {
+  type        = any
+  default     = {}
+  description = "Outputs from the previous deployments that are stored in additional Terraform State Files"
+}
+
+variable "resource_groups" {
+  type        = any
+  default     = {}
+  description = "Resource Groups previously created and being referenced with an Instance key"
 }
 
 variable "public_ip" {
@@ -32,9 +56,9 @@ public_ip = {
 }
 EOT
   type = object({
-    name                    = string
-    location                = string
-    resource_group_name     = string
+    name                    = optional(string)
+    location                = optional(string)
+    resource_group_name     = optional(string)
     allocation_method       = string
     sku                     = optional(string)
     sku_tier                = optional(string)
@@ -49,24 +73,25 @@ EOT
     ddos_protection_mode    = optional(string)
     ddos_protection_plan_id = optional(string)
   })
+  default = null
 
   validation {
-    condition = contains(["Static", "Dynamic"], var.public_ip.allocation_method)
+    condition = var.public_ip == null || contains(["Static", "Dynamic"], var.public_ip.allocation_method)
     error_message = "Allocation method must be either 'Static' or 'Dynamic'."
   }
 
   validation {
-    condition = var.public_ip.sku == null || contains(["Basic", "Standard"], var.public_ip.sku)
+    condition = var.public_ip == null || var.public_ip.sku == null || contains(["Basic", "Standard"], var.public_ip.sku)
     error_message = "SKU must be either 'Basic' or 'Standard'."
   }
 
   validation {
-    condition = var.public_ip.sku_tier == null || contains(["Regional", "Global"], var.public_ip.sku_tier)
+    condition = var.public_ip == null || var.public_ip.sku_tier == null || contains(["Regional", "Global"], var.public_ip.sku_tier)
     error_message = "SKU tier must be either 'Regional' or 'Global'."
   }
 
   validation {
-    condition = var.public_ip.ip_version == null || contains(["IPv4", "IPv6"], var.public_ip.ip_version)
+    condition = var.public_ip == null || var.public_ip.ip_version == null || contains(["IPv4", "IPv6"], var.public_ip.ip_version)
     error_message = "IP version must be either 'IPv4' or 'IPv6'."
   }
 }
@@ -74,4 +99,5 @@ EOT
 variable "tags" {
   description = "(Optional) A mapping of tags to assign to the resource"
   type        = map(string)
+  default     = {}
 } 

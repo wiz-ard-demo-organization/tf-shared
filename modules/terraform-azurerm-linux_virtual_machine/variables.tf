@@ -4,10 +4,34 @@ variable "key" {
   description = "Identifies the specific resource instance being deployed"
 }
 
+variable "settings" {
+  type        = any
+  default     = {}
+  description = "Provides the configuration values for the specific resources being deployed"
+}
+
 variable "global_settings" {
   type        = any
   default     = {}
   description = "Global configurations for the Azure Landing Zone"
+}
+
+variable "client_config" {
+  type        = any
+  default     = null
+  description = "Data source to access the configurations of the Azurerm provider"
+}
+
+variable "remote_states" {
+  type        = any
+  default     = {}
+  description = "Outputs from the previous deployments that are stored in additional Terraform State Files"
+}
+
+variable "resource_groups" {
+  type        = any
+  default     = {}
+  description = "Resource Groups previously created and being referenced with an Instance key"
 }
 
 variable "linux_virtual_machine" {
@@ -155,14 +179,15 @@ variable "linux_virtual_machine" {
     secure_boot_enabled                 = optional(bool)
     vtpm_enabled                        = optional(bool)
   })
+  default = null
 
   validation {
-    condition = var.linux_virtual_machine.source_image_reference != null || var.linux_virtual_machine.source_image_id != null
+    condition = var.linux_virtual_machine == null || (var.linux_virtual_machine.source_image_reference != null || var.linux_virtual_machine.source_image_id != null)
     error_message = "Either source_image_reference or source_image_id must be specified."
   }
 
   validation {
-    condition = var.linux_virtual_machine.disable_password_authentication == false || var.linux_virtual_machine.admin_ssh_key != null
+    condition = var.linux_virtual_machine == null || (var.linux_virtual_machine.disable_password_authentication == false || var.linux_virtual_machine.admin_ssh_key != null)
     error_message = "When disable_password_authentication is true, admin_ssh_key must be provided."
   }
 }
@@ -237,4 +262,5 @@ variable "network_security_group_id" {
 variable "tags" {
   description = "(Optional) A mapping of tags to assign to all resources created by this module."
   type        = map(string)
+  default     = {}
 } 

@@ -8,6 +8,12 @@
 		},
 		{
 			"path": "../../../tf-plat-connectivity"
+		},
+		{
+			"path": "../../../tf-subscription-vending-machine"
+		},
+		{
+			"path": "../../../tf-wizardapp"
 		}
 	],
 	"settings": {

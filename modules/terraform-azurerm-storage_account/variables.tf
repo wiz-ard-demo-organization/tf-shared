@@ -4,10 +4,34 @@ variable "key" {
   description = "Identifies the specific resource instance being deployed"
 }
 
+variable "settings" {
+  type        = any
+  default     = {}
+  description = "Provides the configuration values for the specific resources being deployed"
+}
+
 variable "global_settings" {
   type        = any
   default     = {}
   description = "Global configurations for the Azure Landing Zone"
+}
+
+variable "client_config" {
+  type        = any
+  default     = null
+  description = "Data source to access the configurations of the Azurerm provider"
+}
+
+variable "remote_states" {
+  type        = any
+  default     = {}
+  description = "Outputs from the previous deployments that are stored in additional Terraform State Files"
+}
+
+variable "resource_groups" {
+  type        = any
+  default     = {}
+  description = "Resource Groups previously created and being referenced with an Instance key"
 }
 
 variable "storage_account" {
@@ -22,7 +46,6 @@ variable "storage_account" {
       access_tier : "(Optional) Defines the access tier for BlobStorage, FileStorage and StorageV2 accounts. Valid options are Hot and Cool, defaults to Hot."
       cross_tenant_replication_enabled : "(Optional) Should cross Tenant replication be enabled? Defaults to false."
       edge_zone : "(Optional) Specifies the Edge Zone within the Azure Region where this Storage Account should exist. Changing this forces a new Storage Account to be created."
-      enable_https_traffic_only : "(Optional) Boolean flag which forces HTTPS if enabled. Defaults to true."
       min_tls_version : "(Optional) The minimum supported TLS version for the storage account. Possible values are TLS1_0, TLS1_1, and TLS1_2. Defaults to TLS1_2."
       allow_nested_items_to_be_public : "(Optional) Allow or disallow nested items within this Account to opt into being public. Defaults to false."
       shared_access_key_enabled : "(Optional) Indicates whether the storage account permits requests to be authorized with the account access key via Shared Key. Defaults to true."
@@ -143,16 +166,15 @@ variable "storage_account" {
     }
   EOT
   type = object({
-    name                              = string
-    resource_group_name               = string
-    location                          = string
-    account_tier                      = string
-    account_replication_type          = string
+    name                              = optional(string)
+    resource_group_name               = optional(string)
+    location                          = optional(string)
+    account_tier                      = optional(string)
+    account_replication_type          = optional(string)
     account_kind                      = optional(string, "StorageV2")
     access_tier                       = optional(string, "Hot")
     cross_tenant_replication_enabled  = optional(bool, false)
     edge_zone                         = optional(string)
-    enable_https_traffic_only         = optional(bool, true)
     min_tls_version                   = optional(string, "TLS1_2")
     allow_nested_items_to_be_public   = optional(bool, false)
     shared_access_key_enabled         = optional(bool, true)
@@ -311,14 +333,15 @@ variable "storage_account" {
       expiration_action = optional(string, "Log")
     }))
   })
+  default = null
 
   validation {
-    condition = contains(["Standard", "Premium"], var.storage_account.account_tier)
+    condition = var.storage_account == null || contains(["Standard", "Premium"], var.storage_account.account_tier)
     error_message = "Account tier must be either 'Standard' or 'Premium'."
   }
 
   validation {
-    condition = contains(["LRS", "GRS", "RAGRS", "ZRS", "GZRS", "RAGZRS"], var.storage_account.account_replication_type)
+    condition = var.storage_account == null || contains(["LRS", "GRS", "RAGRS", "ZRS", "GZRS", "RAGZRS"], var.storage_account.account_replication_type)
     error_message = "Invalid account replication type."
   }
 }
@@ -439,4 +462,5 @@ variable "lifecycle_management" {
 variable "tags" {
   description = "(Optional) A mapping of tags to assign to all resources created by this module."
   type        = map(string)
+  default     = {}
 } 

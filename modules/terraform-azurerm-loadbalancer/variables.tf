@@ -4,10 +4,34 @@ variable "key" {
   description = "Identifies the specific resource instance being deployed"
 }
 
+variable "settings" {
+  type        = any
+  default     = {}
+  description = "Provides the configuration values for the specific resources being deployed"
+}
+
 variable "global_settings" {
   type        = any
   default     = {}
   description = "Global configurations for the Azure Landing Zone"
+}
+
+variable "client_config" {
+  type        = any
+  default     = null
+  description = "Data source to access the configurations of the Azurerm provider"
+}
+
+variable "remote_states" {
+  type        = any
+  default     = {}
+  description = "Outputs from the previous deployments that are stored in additional Terraform State Files"
+}
+
+variable "resource_groups" {
+  type        = any
+  default     = {}
+  description = "Resource Groups previously created and being referenced with an Instance key"
 }
 
 variable "load_balancer" {
@@ -33,14 +57,14 @@ variable "load_balancer" {
     }
   EOT
   type = object({
-    name                = string
-    location            = string
-    resource_group_name = string
+    name                = optional(string)
+    location            = optional(string)
+    resource_group_name = optional(string)
     sku                 = optional(string)
     sku_tier            = optional(string)
     edge_zone           = optional(string)
 
-    frontend_ip_configuration = list(object({
+    frontend_ip_configuration = optional(list(object({
       name                          = string
       zones                         = optional(list(string))
       subnet_id                     = optional(string)
@@ -50,21 +74,22 @@ variable "load_balancer" {
       public_ip_address_id          = optional(string)
       public_ip_prefix_id           = optional(string)
       gateway_load_balancer_frontend_ip_configuration_id = optional(string)
-    }))
+    })))
   })
+  default = null
 
   validation {
-    condition = var.load_balancer.sku == null || contains(["Basic", "Standard", "Gateway"], var.load_balancer.sku)
+    condition = var.load_balancer == null || var.load_balancer.sku == null || contains(["Basic", "Standard", "Gateway"], var.load_balancer.sku)
     error_message = "Load Balancer SKU must be one of: 'Basic', 'Standard', or 'Gateway'."
   }
 
   validation {
-    condition = var.load_balancer.sku_tier == null || contains(["Regional", "Global"], var.load_balancer.sku_tier)
+    condition = var.load_balancer == null || var.load_balancer.sku_tier == null || contains(["Regional", "Global"], var.load_balancer.sku_tier)
     error_message = "Load Balancer SKU tier must be one of: 'Regional' or 'Global'."
   }
 
   validation {
-    condition = length(var.load_balancer.frontend_ip_configuration) > 0
+    condition = var.load_balancer == null || (var.load_balancer.frontend_ip_configuration != null && length(var.load_balancer.frontend_ip_configuration) > 0)
     error_message = "At least one frontend IP configuration must be specified."
   }
 }
@@ -101,24 +126,16 @@ variable "backend_address_pool_addresses" {
       backend_address_pool_key : "(Required) The key referencing the Backend Address Pool to which this Backend Address Pool Address belongs."
       virtual_network_id : "(Required) The ID of the Virtual Network within which the Backend Address Pool should exist."
       ip_address : "(Required) The Static IP Address which should be allocated to this Backend Address Pool."
-      inbound_nat_rule_port_mapping : (Optional) One or more inbound_nat_rule_port_mapping blocks. {
-        inbound_nat_rule_name : "(Required) The name of the Inbound NAT Rule."
-        frontend_port : "(Required) The frontend port to be used for this Inbound NAT Rule Port Mapping."
-        backend_port : "(Required) The backend port to be used for this Inbound NAT Rule Port Mapping."
-      }
+      # Note: inbound_nat_rule_port_mapping is a computed attribute set by Azure
+      # and cannot be configured manually. It will be automatically populated
+      # when NAT rules are associated with this backend address pool.
     }
   EOT
   type = map(object({
-    name                       = string
-    backend_address_pool_key   = string
-    virtual_network_id         = string
-    ip_address                 = string
-
-    inbound_nat_rule_port_mapping = optional(list(object({
-      inbound_nat_rule_name = string
-      frontend_port         = number
-      backend_port          = number
-    })))
+    name                     = string
+    backend_address_pool_key = string
+    virtual_network_id       = string
+    ip_address               = string
   }))
   default = {}
 }
@@ -318,4 +335,5 @@ variable "nat_pools" {
 variable "tags" {
   description = "(Optional) A mapping of tags to assign to all resources created by this module."
   type        = map(string)
+  default     = {}
 } 
