@@ -71,7 +71,6 @@ variable "subnet" {
     resource_group_name                           = optional(string)
     virtual_network_name                          = optional(string)
     address_prefixes                              = list(string)
-    private_endpoint_network_policies_enabled     = optional(bool)
     private_link_service_network_policies_enabled = optional(bool)
     service_endpoints                             = optional(list(string))
     service_endpoint_policy_ids                   = optional(list(string))

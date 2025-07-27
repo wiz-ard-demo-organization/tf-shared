@@ -29,7 +29,6 @@ resource "azurerm_subnet" "this" {
   resource_group_name                           = try(var.settings.resource_group_name, local.virtual_network.resource_group_name, var.subnet.resource_group_name)
   virtual_network_name                          = try(var.settings.virtual_network_name, local.virtual_network.name, var.subnet.virtual_network_name)
   address_prefixes                              = try(var.settings.address_prefixes, var.subnet.address_prefixes)
-  private_endpoint_network_policies_enabled     = try(var.settings.private_endpoint_network_policies_enabled, var.subnet.private_endpoint_network_policies_enabled, true)
   private_link_service_network_policies_enabled = try(var.settings.private_link_service_network_policies_enabled, var.subnet.private_link_service_network_policies_enabled, true)
   service_endpoints                             = try(var.settings.service_endpoints, var.subnet.service_endpoints, null)
   service_endpoint_policy_ids                   = try(var.settings.service_endpoint_policy_ids, var.subnet.service_endpoint_policy_ids, null)

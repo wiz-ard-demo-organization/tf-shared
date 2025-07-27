@@ -24,7 +24,6 @@ variable "log_analytics_workspace" {
       reservation_capacity_in_gb_per_day : "(Optional) The capacity reservation level in GB for this workspace. Possible values are 100, 200, 300, 400, 500, 1000, 2000 and 5000."
       data_collection_rule_id : "(Optional) The ID of the Data Collection Rule to use for this workspace."
       immediate_data_purge_on_30_days_enabled : "(Optional) Whether to remove the data in the Log Analytics Workspace immediately after 30 days. Defaults to false."
-      local_authentication_enabled : "(Optional) Specifies if the log Analytics workspace should allow local authentication methods in addition to Microsoft Entra (Azure AD). Defaults to true."
       cmk_for_query_forced : "(Optional) Is Customer Managed Storage mandatory for query management? Defaults to false."
       identity : (Optional) An identity block. {
         type : "(Required) Specifies the type of Managed Service Identity that should be configured on this Log Analytics Workspace. Possible values are SystemAssigned, UserAssigned, SystemAssigned, UserAssigned."
@@ -44,7 +43,6 @@ variable "log_analytics_workspace" {
     reservation_capacity_in_gb_per_day = optional(number)
     data_collection_rule_id    = optional(string)
     immediate_data_purge_on_30_days_enabled = optional(bool, false)
-    local_authentication_enabled = optional(bool, true)
     cmk_for_query_forced       = optional(bool, false)
 
     identity = optional(object({

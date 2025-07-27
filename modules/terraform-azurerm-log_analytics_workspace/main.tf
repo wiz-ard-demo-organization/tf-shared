@@ -29,7 +29,6 @@ resource "azurerm_log_analytics_workspace" "this" {
   # Network and security settings
   internet_ingestion_enabled = var.log_analytics_workspace.internet_ingestion_enabled
   internet_query_enabled     = var.log_analytics_workspace.internet_query_enabled
-  local_authentication_enabled = var.log_analytics_workspace.local_authentication_enabled
   
   # Data management configuration
   data_collection_rule_id    = var.log_analytics_workspace.data_collection_rule_id
