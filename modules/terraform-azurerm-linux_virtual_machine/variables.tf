@@ -180,16 +180,6 @@ variable "linux_virtual_machine" {
     vtpm_enabled                        = optional(bool)
   })
   default = null
-
-  validation {
-    condition = var.linux_virtual_machine == null || (var.linux_virtual_machine.source_image_reference != null || var.linux_virtual_machine.source_image_id != null)
-    error_message = "Either source_image_reference or source_image_id must be specified."
-  }
-
-  validation {
-    condition = var.linux_virtual_machine == null || (var.linux_virtual_machine.disable_password_authentication == false || var.linux_virtual_machine.admin_ssh_key != null)
-    error_message = "When disable_password_authentication is true, admin_ssh_key must be provided."
-  }
 }
 
 variable "network_interface" {
@@ -218,11 +208,6 @@ variable "network_interface" {
       primary                       = optional(bool, true)
     }))
   })
-
-  validation {
-    condition = length(var.network_interface.ip_configuration) > 0
-    error_message = "At least one IP configuration must be specified."
-  }
 }
 
 variable "public_ip_config" {

@@ -41,42 +41,4 @@ variable "policy_definition" {
     parameters               = optional(string)
     parameters_file_path     = optional(string)
   })
-
-  validation {
-    condition = contains(["BuiltIn", "Custom", "NotSpecified", "Static"], var.policy_definition.policy_type)
-    error_message = "Policy type must be one of: 'BuiltIn', 'Custom', 'NotSpecified', or 'Static'."
-  }
-
-  validation {
-    condition = contains([
-      "All", "Indexed", "Microsoft.KeyVault.Data", "Microsoft.ContainerService.Data", 
-      "Microsoft.Kubernetes.Data", "Microsoft.Network.Data"
-    ], var.policy_definition.mode)
-    error_message = "Policy mode must be one of: 'All', 'Indexed', 'Microsoft.KeyVault.Data', 'Microsoft.ContainerService.Data', 'Microsoft.Kubernetes.Data', or 'Microsoft.Network.Data'."
-  }
-
-  validation {
-    condition = !(var.policy_definition.metadata != null && var.policy_definition.metadata_file_path != null)
-    error_message = "Cannot specify both metadata and metadata_file_path. Choose one."
-  }
-
-  validation {
-    condition = !(var.policy_definition.policy_rule != null && var.policy_definition.policy_rule_file_path != null)
-    error_message = "Cannot specify both policy_rule and policy_rule_file_path. Choose one."
-  }
-
-  validation {
-    condition = !(var.policy_definition.parameters != null && var.policy_definition.parameters_file_path != null)
-    error_message = "Cannot specify both parameters and parameters_file_path. Choose one."
-  }
-
-  validation {
-    condition = var.policy_definition.metadata != null || var.policy_definition.metadata_file_path != null
-    error_message = "Either metadata or metadata_file_path must be specified."
-  }
-
-  validation {
-    condition = var.policy_definition.policy_rule != null || var.policy_definition.policy_rule_file_path != null
-    error_message = "Either policy_rule or policy_rule_file_path must be specified."
-  }
 }

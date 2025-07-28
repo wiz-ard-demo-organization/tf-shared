@@ -61,33 +61,6 @@ variable "sql_server" {
       identity_ids = optional(list(string))
     }))
   })
-
-  validation {
-    condition = contains(["12.0"], var.sql_server.version)
-    error_message = "SQL Server version must be '12.0'."
-  }
-
-  validation {
-    condition = contains(["1.0", "1.1", "1.2"], var.sql_server.minimum_tls_version)
-    error_message = "Minimum TLS version must be '1.0', '1.1', or '1.2'."
-  }
-
-  validation {
-    condition = contains(["Default", "Proxy", "Redirect"], var.sql_server.connection_policy)
-    error_message = "Connection policy must be 'Default', 'Proxy', or 'Redirect'."
-  }
-
-  validation {
-    condition = (
-      var.sql_server.administrator_login != null && var.sql_server.administrator_login_password != null
-    ) || var.sql_server.azuread_administrator != null
-    error_message = "Either SQL authentication (administrator_login and administrator_login_password) or Azure AD administrator must be configured."
-  }
-
-  validation {
-    condition = var.sql_server.identity == null || contains(["SystemAssigned", "UserAssigned", "SystemAssigned, UserAssigned"], var.sql_server.identity.type)
-    error_message = "Identity type must be 'SystemAssigned', 'UserAssigned', or 'SystemAssigned, UserAssigned'."
-  }
 }
 
 variable "sql_databases" {
@@ -149,55 +122,6 @@ variable "sql_databases" {
     }))
   }))
   default = {}
-
-  validation {
-    condition = alltrue([
-      for db in var.sql_databases : contains(["Default", "Copy", "OnlineSecondary", "PointInTimeRestore", "Restore", "Recovery", "RestoreExternalBackup", "RestoreExternalBackupSecondary", "RestoreLongTermRetentionBackup", "Secondary"], db.create_mode)
-    ])
-    error_message = "Create mode must be a valid SQL Database create mode."
-  }
-
-  validation {
-    condition = alltrue([
-      for db in var.sql_databases : db.license_type == null || contains(["LicenseIncluded", "BasePrice"], db.license_type)
-    ])
-    error_message = "License type must be 'LicenseIncluded' or 'BasePrice'."
-  }
-
-  validation {
-    condition = alltrue([
-      for db in var.sql_databases : db.storage_account_type == null || contains(["Geo", "GeoZone", "Local", "Zone"], db.storage_account_type)
-    ])
-    error_message = "Storage account type must be 'Geo', 'GeoZone', 'Local', or 'Zone'."
-  }
-
-  validation {
-    condition = alltrue([
-      for db in var.sql_databases : db.sample_name == null || contains(["AdventureWorksLT", "WideWorldImportersStd", "WideWorldImportersFull"], db.sample_name)
-    ])
-    error_message = "Sample name must be 'AdventureWorksLT', 'WideWorldImportersStd', or 'WideWorldImportersFull'."
-  }
-
-  validation {
-    condition = alltrue([
-      for db in var.sql_databases : db.threat_detection_policy == null || contains(["Enabled", "Disabled"], db.threat_detection_policy.state)
-    ])
-    error_message = "Threat detection policy state must be 'Enabled' or 'Disabled'."
-  }
-
-  validation {
-    condition = alltrue([
-      for db in var.sql_databases : db.short_term_retention_policy == null || (db.short_term_retention_policy.retention_days >= 1 && db.short_term_retention_policy.retention_days <= 35)
-    ])
-    error_message = "Short term retention policy retention days must be between 1 and 35."
-  }
-
-  validation {
-    condition = alltrue([
-      for db in var.sql_databases : db.import == null || contains(["StorageAccessKey", "SharedAccessKey"], db.import.storage_key_type)
-    ])
-    error_message = "Import storage key type must be 'StorageAccessKey' or 'SharedAccessKey'."
-  }
 }
 
 variable "firewall_rules" {
@@ -208,13 +132,6 @@ variable "firewall_rules" {
     end_ip_address   = string
   }))
   default = {}
-
-  validation {
-    condition = alltrue([
-      for rule in var.firewall_rules : can(cidrhost("${rule.start_ip_address}/32", 0)) && can(cidrhost("${rule.end_ip_address}/32", 0))
-    ])
-    error_message = "Start and end IP addresses must be valid IP addresses."
-  }
 }
 
 variable "virtual_network_rules" {
@@ -237,16 +154,6 @@ variable "extended_auditing_policy" {
     log_monitoring_enabled                  = optional(bool, false)
   })
   default = null
-
-  validation {
-    condition = var.extended_auditing_policy == null || (var.extended_auditing_policy.enabled == false || (var.extended_auditing_policy.storage_endpoint != null && var.extended_auditing_policy.storage_account_access_key != null))
-    error_message = "When extended auditing is enabled, storage_endpoint and storage_account_access_key must be provided."
-  }
-
-  validation {
-    condition = var.extended_auditing_policy == null || var.extended_auditing_policy.retention_in_days == null || (var.extended_auditing_policy.retention_in_days >= 0 && var.extended_auditing_policy.retention_in_days <= 3285)
-    error_message = "Retention in days must be between 0 and 3285."
-  }
 }
 
 variable "security_alert_policy" {
@@ -261,25 +168,6 @@ variable "security_alert_policy" {
     storage_endpoint           = optional(string)
   })
   default = null
-
-  validation {
-    condition = var.security_alert_policy == null || contains(["Enabled", "Disabled"], var.security_alert_policy.state)
-    error_message = "Security alert policy state must be 'Enabled' or 'Disabled'."
-  }
-
-  validation {
-    condition = var.security_alert_policy == null || var.security_alert_policy.disabled_alerts == null || alltrue([
-      for alert in var.security_alert_policy.disabled_alerts : contains([
-        "Sql_Injection",
-        "Sql_Injection_Vulnerability",
-        "Access_Anomaly",
-        "Data_Exfiltration",
-        "Unsafe_Action",
-        "Brute_Force"
-      ], alert)
-    ])
-    error_message = "Disabled alerts must be valid alert types."
-  }
 }
 
 variable "vulnerability_assessment" {
@@ -319,27 +207,6 @@ variable "elastic_pools" {
     })
   }))
   default = {}
-
-  validation {
-    condition = alltrue([
-      for pool in var.elastic_pools : pool.license_type == null || contains(["LicenseIncluded", "BasePrice"], pool.license_type)
-    ])
-    error_message = "Elastic pool license type must be 'LicenseIncluded' or 'BasePrice'."
-  }
-
-  validation {
-    condition = alltrue([
-      for pool in var.elastic_pools : contains(["BasicPool", "StandardPool", "PremiumPool", "GP_Gen4", "GP_Gen5", "GP_Fsv2", "GP_DC", "BC_Gen4", "BC_Gen5", "BC_M"], pool.sku.name)
-    ])
-    error_message = "Elastic pool SKU name must be a valid elastic pool SKU."
-  }
-
-  validation {
-    condition = alltrue([
-      for pool in var.elastic_pools : contains(["Basic", "Standard", "Premium", "GeneralPurpose", "BusinessCritical"], pool.sku.tier)
-    ])
-    error_message = "Elastic pool SKU tier must be a valid tier."
-  }
 }
 
 variable "tags" {

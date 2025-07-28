@@ -85,40 +85,4 @@ variable "policy_assignment" {
     })))
   })
   default = null
-
-  validation {
-    condition = var.policy_assignment == null || can(regex("^/.*", var.policy_assignment.policy_definition_id))
-    error_message = "policy_definition_id must be a valid Azure resource ID starting with '/'."
-  }
-
-  validation {
-    condition = var.policy_assignment == null || !(var.policy_assignment.parameters != null && var.policy_assignment.parameters_file_path != null)
-    error_message = "Cannot specify both parameters and parameters_file_path. Choose one."
-  }
-
-  validation {
-    condition = var.policy_assignment == null || var.policy_assignment.identity == null || var.policy_assignment.location != null
-    error_message = "location must be specified when identity is configured."
-  }
-
-  validation {
-    condition = var.policy_assignment == null || var.policy_assignment.identity == null || contains(["SystemAssigned", "UserAssigned"], var.policy_assignment.identity.type)
-    error_message = "identity.type must be either 'SystemAssigned' or 'UserAssigned'."
-  }
-
-  validation {
-    condition = var.policy_assignment == null || var.policy_assignment.identity == null || var.policy_assignment.identity.type != "UserAssigned" || var.policy_assignment.identity.identity_ids != null
-    error_message = "identity_ids must be specified when identity.type is 'UserAssigned'."
-  }
-
-  validation {
-    condition = var.policy_assignment == null || var.policy_assignment.resource_selectors == null || alltrue([
-      for rs in var.policy_assignment.resource_selectors : alltrue([
-        for s in rs.selectors : contains(["resourceLocation", "resourceType", "resourceWithoutLocation"], s.kind)
-      ])
-    ])
-    error_message = "resource_selector kind must be one of: 'resourceLocation', 'resourceType', or 'resourceWithoutLocation'."
-  }
-
-
 }

@@ -26,7 +26,6 @@ resource "azurerm_private_endpoint" "this" {
   private_service_connection {
     name                           = var.private_endpoint.private_service_connection.name
     private_connection_resource_id = var.private_endpoint.private_service_connection.private_connection_resource_id
-    group_ids                      = var.private_endpoint.private_service_connection.group_ids
     subresource_names              = var.private_endpoint.private_service_connection.subresource_names
     is_manual_connection           = var.private_endpoint.private_service_connection.is_manual_connection
     private_connection_resource_alias = var.private_endpoint.private_service_connection.private_connection_resource_alias

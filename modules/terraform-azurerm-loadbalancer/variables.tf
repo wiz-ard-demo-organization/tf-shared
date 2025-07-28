@@ -77,21 +77,6 @@ variable "load_balancer" {
     })))
   })
   default = null
-
-  validation {
-    condition = var.load_balancer == null || var.load_balancer.sku == null || contains(["Basic", "Standard", "Gateway"], var.load_balancer.sku)
-    error_message = "Load Balancer SKU must be one of: 'Basic', 'Standard', or 'Gateway'."
-  }
-
-  validation {
-    condition = var.load_balancer == null || var.load_balancer.sku_tier == null || contains(["Regional", "Global"], var.load_balancer.sku_tier)
-    error_message = "Load Balancer SKU tier must be one of: 'Regional' or 'Global'."
-  }
-
-  validation {
-    condition = var.load_balancer == null || (var.load_balancer.frontend_ip_configuration != null && length(var.load_balancer.frontend_ip_configuration) > 0)
-    error_message = "At least one frontend IP configuration must be specified."
-  }
 }
 
 variable "backend_address_pools" {
@@ -162,20 +147,6 @@ variable "health_probes" {
     number_of_probes    = optional(number)
   }))
   default = {}
-
-  validation {
-    condition = alltrue([
-      for probe in var.health_probes : contains(["Http", "Https", "Tcp"], probe.protocol)
-    ])
-    error_message = "Health probe protocol must be one of: 'Http', 'Https', or 'Tcp'."
-  }
-
-  validation {
-    condition = alltrue([
-      for probe in var.health_probes : probe.protocol != "Http" && probe.protocol != "Https" || probe.request_path != null
-    ])
-    error_message = "Request path is required for HTTP and HTTPS health probes."
-  }
 }
 
 variable "load_balancing_rules" {
@@ -210,20 +181,6 @@ variable "load_balancing_rules" {
     enable_tcp_reset               = optional(bool)
   }))
   default = {}
-
-  validation {
-    condition = alltrue([
-      for rule in var.load_balancing_rules : contains(["Tcp", "Udp", "All"], rule.protocol)
-    ])
-    error_message = "Load balancing rule protocol must be one of: 'Tcp', 'Udp', or 'All'."
-  }
-
-  validation {
-    condition = alltrue([
-      for rule in var.load_balancing_rules : rule.load_distribution == null || contains(["Default", "SourceIP", "SourceIPProtocol"], rule.load_distribution)
-    ])
-    error_message = "Load distribution must be one of: 'Default', 'SourceIP', or 'SourceIPProtocol'."
-  }
 }
 
 variable "nat_rules" {
@@ -250,13 +207,6 @@ variable "nat_rules" {
     enable_tcp_reset               = optional(bool)
   }))
   default = {}
-
-  validation {
-    condition = alltrue([
-      for rule in var.nat_rules : contains(["Tcp", "Udp", "All"], rule.protocol)
-    ])
-    error_message = "NAT rule protocol must be one of: 'Tcp', 'Udp', or 'All'."
-  }
 }
 
 variable "outbound_rules" {
@@ -281,13 +231,6 @@ variable "outbound_rules" {
     enable_tcp_reset                = optional(bool)
   }))
   default = {}
-
-  validation {
-    condition = alltrue([
-      for rule in var.outbound_rules : contains(["Tcp", "Udp", "All"], rule.protocol)
-    ])
-    error_message = "Outbound rule protocol must be one of: 'Tcp', 'Udp', or 'All'."
-  }
 }
 
 variable "nat_pools" {
@@ -316,20 +259,6 @@ variable "nat_pools" {
     tcp_reset_enabled              = optional(bool)
   }))
   default = {}
-
-  validation {
-    condition = alltrue([
-      for pool in var.nat_pools : contains(["Tcp", "Udp", "All"], pool.protocol)
-    ])
-    error_message = "NAT pool protocol must be one of: 'Tcp', 'Udp', or 'All'."
-  }
-
-  validation {
-    condition = alltrue([
-      for pool in var.nat_pools : pool.frontend_port_start <= pool.frontend_port_end
-    ])
-    error_message = "Frontend port start must be less than or equal to frontend port end."
-  }
 }
 
 variable "public_ips" {

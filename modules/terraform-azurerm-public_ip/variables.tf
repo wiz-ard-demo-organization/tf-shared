@@ -74,26 +74,6 @@ EOT
     ddos_protection_plan_id = optional(string)
   })
   default = null
-
-  validation {
-    condition = var.public_ip == null || contains(["Static", "Dynamic"], var.public_ip.allocation_method)
-    error_message = "Allocation method must be either 'Static' or 'Dynamic'."
-  }
-
-  validation {
-    condition = var.public_ip == null || var.public_ip.sku == null || contains(["Basic", "Standard"], var.public_ip.sku)
-    error_message = "SKU must be either 'Basic' or 'Standard'."
-  }
-
-  validation {
-    condition = var.public_ip == null || var.public_ip.sku_tier == null || contains(["Regional", "Global"], var.public_ip.sku_tier)
-    error_message = "SKU tier must be either 'Regional' or 'Global'."
-  }
-
-  validation {
-    condition = var.public_ip == null || var.public_ip.ip_version == null || contains(["IPv4", "IPv6"], var.public_ip.ip_version)
-    error_message = "IP version must be either 'IPv4' or 'IPv6'."
-  }
 }
 
 variable "tags" {

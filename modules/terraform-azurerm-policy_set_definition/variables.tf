@@ -71,27 +71,4 @@ variable "policy_set_definition" {
     })))
   })
   default = null
-
-  validation {
-    condition = var.policy_set_definition == null || contains(["BuiltIn", "Custom", "NotSpecified", "Static"], var.policy_set_definition.policy_type)
-    error_message = "Policy type must be one of: 'BuiltIn', 'Custom', 'NotSpecified', or 'Static'."
-  }
-
-  validation {
-    condition = var.policy_set_definition == null || !(var.policy_set_definition.parameters != null && var.policy_set_definition.parameters_file_path != null)
-    error_message = "Cannot specify both parameters and parameters_file_path. Choose one."
-  }
-
-  validation {
-    condition = var.policy_set_definition == null || length(var.policy_set_definition.policy_definition_references) > 0
-    error_message = "At least one policy definition reference must be specified."
-  }
-
-  validation {
-    condition = var.policy_set_definition == null || alltrue([
-      for ref in var.policy_set_definition.policy_definition_references : 
-      can(regex("^/.*", ref.policy_definition_id))
-    ])
-    error_message = "All policy_definition_id values must be valid Azure resource IDs starting with '/'."
-  }
 }

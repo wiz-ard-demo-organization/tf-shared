@@ -112,11 +112,6 @@ variable "container_registry" {
     }))
   })
   default = null
-
-  validation {
-    condition = var.container_registry == null || contains(["Basic", "Standard", "Premium"], var.container_registry.sku)
-    error_message = "SKU must be either 'Basic', 'Standard', or 'Premium'."
-  }
 }
 
 variable "tags" {

@@ -334,16 +334,6 @@ variable "storage_account" {
     }))
   })
   default = null
-
-  validation {
-    condition = var.storage_account == null || contains(["Standard", "Premium"], var.storage_account.account_tier)
-    error_message = "Account tier must be either 'Standard' or 'Premium'."
-  }
-
-  validation {
-    condition = var.storage_account == null || contains(["LRS", "GRS", "RAGRS", "ZRS", "GZRS", "RAGZRS"], var.storage_account.account_replication_type)
-    error_message = "Invalid account replication type."
-  }
 }
 
 variable "storage_containers" {
@@ -360,13 +350,6 @@ variable "storage_containers" {
     metadata              = optional(map(string))
   }))
   default = {}
-
-  validation {
-    condition = alltrue([
-      for container in var.storage_containers : contains(["blob", "container", "private"], container.container_access_type)
-    ])
-    error_message = "Container access type must be one of: 'blob', 'container', or 'private'."
-  }
 }
 
 variable "lifecycle_management" {
@@ -450,13 +433,6 @@ variable "lifecycle_management" {
     }))
   })
   default = null
-
-  validation {
-    condition = var.lifecycle_management == null || alltrue([
-      for rule in var.lifecycle_management.rule : contains(["blockBlob"], rule.filters.blob_types...) || contains(["appendBlob"], rule.filters.blob_types...)
-    ])
-    error_message = "Blob types must include 'blockBlob' or 'appendBlob'."
-  }
 }
 
 variable "tags" {

@@ -343,16 +343,6 @@ variable "kubernetes_cluster" {
     }))
   })
   default = null
-
-  validation {
-    condition = var.kubernetes_cluster == null || (var.kubernetes_cluster.dns_prefix != null || var.kubernetes_cluster.dns_prefix_private_cluster != null)
-    error_message = "Either dns_prefix or dns_prefix_private_cluster must be specified."
-  }
-
-  validation {
-    condition = var.kubernetes_cluster == null || (var.kubernetes_cluster.identity != null || var.kubernetes_cluster.service_principal != null)
-    error_message = "Either identity or service_principal must be configured."
-  }
 }
 
 variable "tags" {

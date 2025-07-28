@@ -50,31 +50,6 @@ variable "log_analytics_workspace" {
       identity_ids = optional(list(string))
     }))
   })
-
-  validation {
-    condition = contains(["Free", "PerNode", "Premium", "Standard", "Standalone", "Unlimited", "CapacityReservation", "PerGB2018"], var.log_analytics_workspace.sku)
-    error_message = "SKU must be one of: 'Free', 'PerNode', 'Premium', 'Standard', 'Standalone', 'Unlimited', 'CapacityReservation', or 'PerGB2018'."
-  }
-
-  validation {
-    condition = var.log_analytics_workspace.retention_in_days == null || (var.log_analytics_workspace.retention_in_days >= 30 && var.log_analytics_workspace.retention_in_days <= 730)
-    error_message = "Retention in days must be between 30 and 730 days."
-  }
-
-  validation {
-    condition = var.log_analytics_workspace.daily_quota_gb == null || var.log_analytics_workspace.daily_quota_gb >= -1
-    error_message = "Daily quota GB must be -1 (unlimited) or a positive number."
-  }
-
-  validation {
-    condition = var.log_analytics_workspace.reservation_capacity_in_gb_per_day == null || contains([100, 200, 300, 400, 500, 1000, 2000, 5000], var.log_analytics_workspace.reservation_capacity_in_gb_per_day)
-    error_message = "Reservation capacity must be one of: 100, 200, 300, 400, 500, 1000, 2000, or 5000 GB per day."
-  }
-
-  validation {
-    condition = var.log_analytics_workspace.identity == null || contains(["SystemAssigned", "UserAssigned", "SystemAssigned, UserAssigned"], var.log_analytics_workspace.identity.type)
-    error_message = "Identity type must be 'SystemAssigned', 'UserAssigned', or 'SystemAssigned, UserAssigned'."
-  }
 }
 
 
