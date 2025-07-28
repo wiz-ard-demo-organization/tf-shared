@@ -165,7 +165,7 @@ resource "azurerm_linux_virtual_machine" "this" {
     for_each = try(var.settings.identity, var.linux_virtual_machine != null ? var.linux_virtual_machine.identity : null, null) != null ? [try(var.settings.identity, var.linux_virtual_machine.identity)] : []
     content {
       type         = identity.value.type
-      identity_ids = identity.value.identity_ids
+      identity_ids = identity.value.type == "UserAssigned" ? identity.value.identity_ids : null
     }
   }
 
