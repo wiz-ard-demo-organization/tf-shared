@@ -75,20 +75,6 @@ variable "virtual_network" {
   })
   default = null
 
-  validation {
-    condition = var.virtual_network == null || length(var.virtual_network.address_space) > 0
-    error_message = "At least one address space must be specified for the virtual network."
-  }
-
-  validation {
-    condition = var.virtual_network == null || var.virtual_network.encryption == null || contains(["AllowUnencrypted", "DropUnencrypted"], var.virtual_network.encryption.enforcement)
-    error_message = "Encryption enforcement must be either 'AllowUnencrypted' or 'DropUnencrypted'."
-  }
-
-  validation {
-    condition = var.virtual_network == null || var.virtual_network.flow_timeout_in_minutes == null || (var.virtual_network.flow_timeout_in_minutes >= 4 && var.virtual_network.flow_timeout_in_minutes <= 30)
-    error_message = "flow_timeout_in_minutes must be between 4 and 30 minutes."
-  }
 }
 
 variable "tags" {
