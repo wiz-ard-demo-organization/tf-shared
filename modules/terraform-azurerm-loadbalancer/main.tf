@@ -36,14 +36,17 @@ resource "azurerm_lb" "this" {
     for_each = try(var.settings.frontend_ip_configuration, var.load_balancer != null ? var.load_balancer.frontend_ip_configuration : null, [])
     content {
       name                          = frontend_ip_configuration.value.name
-      zones                         = frontend_ip_configuration.value.zones
-      subnet_id                     = frontend_ip_configuration.value.subnet_id
-      private_ip_address            = frontend_ip_configuration.value.private_ip_address
-      private_ip_address_allocation = frontend_ip_configuration.value.private_ip_address_allocation
-      private_ip_address_version    = frontend_ip_configuration.value.private_ip_address_version
-      public_ip_address_id          = frontend_ip_configuration.value.public_ip_address_id
-      public_ip_prefix_id           = frontend_ip_configuration.value.public_ip_prefix_id
-      gateway_load_balancer_frontend_ip_configuration_id = frontend_ip_configuration.value.gateway_load_balancer_frontend_ip_configuration_id
+      zones                         = try(frontend_ip_configuration.value.zones, null)
+      subnet_id                     = try(frontend_ip_configuration.value.subnet_id, null)
+      private_ip_address            = try(frontend_ip_configuration.value.private_ip_address, null)
+      private_ip_address_allocation = try(frontend_ip_configuration.value.private_ip_address_allocation, null)
+      private_ip_address_version    = try(frontend_ip_configuration.value.private_ip_address_version, null)
+      public_ip_address_id          = try(
+        frontend_ip_configuration.value.public_ip_address_id != null && can(var.public_ips[frontend_ip_configuration.value.public_ip_address_id]) ? var.public_ips[frontend_ip_configuration.value.public_ip_address_id].id : frontend_ip_configuration.value.public_ip_address_id, 
+        null
+      )
+      public_ip_prefix_id           = try(frontend_ip_configuration.value.public_ip_prefix_id, null)
+      gateway_load_balancer_frontend_ip_configuration_id = try(frontend_ip_configuration.value.gateway_load_balancer_frontend_ip_configuration_id, null)
     }
   }
 

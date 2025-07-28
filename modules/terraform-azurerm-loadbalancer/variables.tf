@@ -332,6 +332,12 @@ variable "nat_pools" {
   }
 }
 
+variable "public_ips" {
+  type        = any
+  default     = {}
+  description = "Public IP addresses previously created and being referenced with an Instance key"
+}
+
 variable "tags" {
   description = "(Optional) A mapping of tags to assign to all resources created by this module."
   type        = map(string)
