@@ -301,7 +301,7 @@ resource "azurerm_storage_container" "this" {
   name                  = each.value.name
   storage_account_name  = azurerm_storage_account.this.name
   container_access_type = each.value.container_access_type
-  metadata              = each.value.metadata
+  metadata              = try(each.value.metadata, null)
 }
 
 # Storage Management Policy - Configure lifecycle management rules for automatic blob tiering and deletion
