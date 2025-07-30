@@ -67,7 +67,6 @@ resource "azurerm_key_vault" "this" {
   }
 
   tags = merge(
-    var.global_settings.tags,
     try(var.settings.tags, {}),
     var.tags
   )
