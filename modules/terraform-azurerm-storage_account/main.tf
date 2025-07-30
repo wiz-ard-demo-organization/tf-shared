@@ -33,7 +33,6 @@ resource "azurerm_storage_account" "this" {
   access_tier                       = try(var.settings.access_tier, var.storage_account != null ? var.storage_account.access_tier : null)
   cross_tenant_replication_enabled  = try(var.settings.cross_tenant_replication_enabled, var.storage_account != null ? var.storage_account.cross_tenant_replication_enabled : null)
   edge_zone                         = try(var.settings.edge_zone, var.storage_account != null ? var.storage_account.edge_zone : null, null)
-  enable_https_traffic_only         = try(var.settings.enable_https_traffic_only, var.storage_account != null ? var.storage_account.enable_https_traffic_only : null)
   min_tls_version                   = try(var.settings.min_tls_version, var.storage_account != null ? var.storage_account.min_tls_version : null)
   allow_nested_items_to_be_public   = try(var.settings.allow_nested_items_to_be_public, var.storage_account != null ? var.storage_account.allow_nested_items_to_be_public : null)
   shared_access_key_enabled         = try(var.settings.shared_access_key_enabled, var.storage_account != null ? var.storage_account.shared_access_key_enabled : null)
