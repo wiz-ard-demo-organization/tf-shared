@@ -20,8 +20,8 @@ module "name" {
 
 locals {
   resource_group = can(var.settings.resource_group.state_key) ? try(var.remote_states[var.settings.resource_group.state_key].resource_groups[var.settings.resource_group.key], null) : try(var.resource_groups[var.settings.resource_group.key], null)
-  # Handle both settings.rules and network_security_group.security_rules formats
-  security_rules = try(var.settings.rules, var.network_security_group.security_rules, {})
+  # Handle both settings.security_rules and network_security_group.security_rules formats
+  security_rules = try(var.settings.security_rules, var.network_security_group.security_rules, {})
 }
 
 # Create the Network Security Group resource with configurable security rules for network traffic control
