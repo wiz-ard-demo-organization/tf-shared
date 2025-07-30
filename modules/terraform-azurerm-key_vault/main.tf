@@ -66,10 +66,8 @@ resource "azurerm_key_vault" "this" {
     }
   }
 
-  tags = merge(
-    try(var.settings.tags, {}),
-    var.tags
-  )
+  tags = var.tags
+
 }
 
 # Legacy Access Policies (only if RBAC is disabled and access policies are provided)
