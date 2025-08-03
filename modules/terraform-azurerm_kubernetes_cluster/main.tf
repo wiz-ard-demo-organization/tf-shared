@@ -59,7 +59,7 @@ resource "azurerm_kubernetes_cluster" "this" {
   
   # Upgrade and maintenance settings
   automatic_upgrade_channel           = try(var.settings.automatic_upgrade_channel, var.kubernetes_cluster != null ? var.kubernetes_cluster.automatic_upgrade_channel : null)
-  node_os_upgrade_channel             = try(var.settings.node_os_upgrade_channel, var.kubernetes_cluster != null ? var.kubernetes_cluster.node_os_upgrade_channel : null)
+  # node_os_upgrade_channel             = try(var.settings.node_os_upgrade_channel, var.kubernetes_cluster != null ? var.kubernetes_cluster.node_os_upgrade_channel : null)
   
   # Add-ons and features
   azure_policy_enabled                = try(var.settings.azure_policy_enabled, var.kubernetes_cluster != null ? var.kubernetes_cluster.azure_policy_enabled : null)
@@ -81,7 +81,7 @@ resource "azurerm_kubernetes_cluster" "this" {
     zones                        = try(var.settings.default_node_pool.zones, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.zones : null)
     
     # Auto-scaling configuration
-    auto_scaling_enabled         = try(var.settings.default_node_pool.auto_scaling_enabled, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.auto_scaling_enabled : null)
+    # auto_scaling_enabled         = try(var.settings.default_node_pool.auto_scaling_enabled, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.auto_scaling_enabled : null)
     min_count                    = try(var.settings.default_node_pool.min_count, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.min_count : null)
     max_count                    = try(var.settings.default_node_pool.max_count, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.max_count : null)
     
@@ -94,11 +94,11 @@ resource "azurerm_kubernetes_cluster" "this" {
     
     # Network settings
     node_public_ip_prefix_id     = try(var.settings.default_node_pool.node_public_ip_prefix_id, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.node_public_ip_prefix_id : null)
-    node_public_ip_enabled       = try(var.settings.default_node_pool.node_public_ip_enabled, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.node_public_ip_enabled : null)
+    # node_public_ip_enabled       = try(var.settings.default_node_pool.node_public_ip_enabled, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.node_public_ip_enabled : null)
     pod_subnet_id                = try(var.settings.default_node_pool.pod_subnet_id, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.pod_subnet_id : null)
     
     # Security and encryption
-    host_encryption_enabled      = try(var.settings.default_node_pool.host_encryption_enabled, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.host_encryption_enabled : null)
+    # host_encryption_enabled      = try(var.settings.default_node_pool.host_encryption_enabled, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.host_encryption_enabled : null)
     fips_enabled                 = try(var.settings.default_node_pool.fips_enabled, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.fips_enabled : null)
     
     # Advanced configuration
