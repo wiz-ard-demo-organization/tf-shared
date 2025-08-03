@@ -20,6 +20,16 @@ module "name" {
 
 locals {
   resource_group = can(var.settings.resource_group.state_key) ? try(var.remote_states[var.settings.resource_group.state_key].resource_groups[var.settings.resource_group.key], null) : try(var.resource_groups[var.settings.resource_group.key], null)
+  
+  # Resolve subnet ID from subnet_key if provided
+  subnet_id = try(
+    # First try to get subnet from subnets variable using subnet_key
+    var.subnets[var.settings.subnet_key].subnet.id,
+    # Then try to get it from default_node_pool.vnet_subnet_id
+    var.settings.default_node_pool.vnet_subnet_id,
+    # Finally fall back to null
+    null
+  )
 }
 
 # Create the AKS cluster with specified configuration for container orchestration
@@ -45,8 +55,8 @@ resource "azurerm_kubernetes_cluster" "this" {
   local_account_disabled              = try(var.settings.local_account_disabled, var.kubernetes_cluster != null ? var.kubernetes_cluster.local_account_disabled : null)
   
   # Upgrade and maintenance settings
-  automatic_channel_upgrade           = try(var.settings.automatic_channel_upgrade, var.kubernetes_cluster != null ? var.kubernetes_cluster.automatic_channel_upgrade : null)
-  node_os_channel_upgrade             = try(var.settings.node_os_channel_upgrade, var.kubernetes_cluster != null ? var.kubernetes_cluster.node_os_channel_upgrade : null)
+  automatic_upgrade_channel           = try(var.settings.automatic_channel_upgrade, var.kubernetes_cluster != null ? var.kubernetes_cluster.automatic_channel_upgrade : null)
+  node_os_upgrade_channel             = try(var.settings.node_os_channel_upgrade, var.kubernetes_cluster != null ? var.kubernetes_cluster.node_os_channel_upgrade : null)
   
   # Add-ons and features
   azure_policy_enabled                = try(var.settings.azure_policy_enabled, var.kubernetes_cluster != null ? var.kubernetes_cluster.azure_policy_enabled : null)
@@ -66,11 +76,11 @@ resource "azurerm_kubernetes_cluster" "this" {
     name                         = try(var.settings.default_node_pool.name, var.kubernetes_cluster.default_node_pool.name)
     node_count                   = try(var.settings.default_node_pool.node_count, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.node_count : null)
     vm_size                      = try(var.settings.default_node_pool.vm_size, var.kubernetes_cluster.default_node_pool.vm_size)
-    vnet_subnet_id               = try(var.settings.default_node_pool.vnet_subnet_id, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.vnet_subnet_id : null)
+    vnet_subnet_id               = try(local.subnet_id, var.settings.default_node_pool.vnet_subnet_id, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.vnet_subnet_id : null)
     zones                        = try(var.settings.default_node_pool.zones, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.zones : null)
     
     # Auto-scaling configuration
-    enable_auto_scaling          = try(var.settings.default_node_pool.enable_auto_scaling, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.enable_auto_scaling : null)
+    auto_scaling_enabled         = try(var.settings.default_node_pool.enable_auto_scaling, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.enable_auto_scaling : null)
     min_count                    = try(var.settings.default_node_pool.min_count, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.min_count : null)
     max_count                    = try(var.settings.default_node_pool.max_count, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.max_count : null)
     
@@ -83,11 +93,11 @@ resource "azurerm_kubernetes_cluster" "this" {
     
     # Network settings
     node_public_ip_prefix_id     = try(var.settings.default_node_pool.node_public_ip_prefix_id, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.node_public_ip_prefix_id : null)
-    enable_node_public_ip        = try(var.settings.default_node_pool.enable_node_public_ip, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.enable_node_public_ip : null)
+    node_public_ip_enabled       = try(var.settings.default_node_pool.enable_node_public_ip, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.enable_node_public_ip : null)
     pod_subnet_id                = try(var.settings.default_node_pool.pod_subnet_id, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.pod_subnet_id : null)
     
     # Security and encryption
-    enable_host_encryption       = try(var.settings.default_node_pool.enable_host_encryption, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.enable_host_encryption : null)
+    host_encryption_enabled      = try(var.settings.default_node_pool.enable_host_encryption, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.enable_host_encryption : null)
     fips_enabled                 = try(var.settings.default_node_pool.fips_enabled, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.fips_enabled : null)
     
     # Advanced configuration
@@ -482,8 +492,9 @@ resource "azurerm_kubernetes_cluster" "this" {
     for_each = try(var.settings.service_mesh_profile, var.kubernetes_cluster != null ? var.kubernetes_cluster.service_mesh_profile : null, null) != null ? [try(var.settings.service_mesh_profile, var.kubernetes_cluster.service_mesh_profile)] : []
     content {
       mode                             = service_mesh_profile.value.mode
-      internal_ingress_gateway_enabled = service_mesh_profile.value.internal_ingress_gateway_enabled
-      external_ingress_gateway_enabled = service_mesh_profile.value.external_ingress_gateway_enabled
+      revisions                        = try(service_mesh_profile.value.revisions, [])
+      internal_ingress_gateway_enabled = try(service_mesh_profile.value.internal_ingress_gateway_enabled, null)
+      external_ingress_gateway_enabled = try(service_mesh_profile.value.external_ingress_gateway_enabled, null)
     }
   }
 

@@ -34,6 +34,12 @@ variable "resource_groups" {
   description = "Resource Groups previously created and being referenced with an Instance key"
 }
 
+variable "subnets" {
+  type        = any
+  default     = {}
+  description = "Subnets previously created and being referenced with an Instance key"
+}
+
 variable "kubernetes_cluster" {
   description = "Configuration for the Azure Kubernetes Service cluster"
   type = object({
