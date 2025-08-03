@@ -58,7 +58,7 @@ resource "azurerm_kubernetes_cluster" "this" {
   local_account_disabled              = try(var.settings.local_account_disabled, var.kubernetes_cluster != null ? var.kubernetes_cluster.local_account_disabled : null)
   
   # Upgrade and maintenance settings
-  automatic_upgrade_channel           = try(var.settings.automatic_upgrade_channel, var.kubernetes_cluster != null ? var.kubernetes_cluster.automatic_upgrade_channel : null)
+  # automatic_upgrade_channel           = try(var.settings.automatic_upgrade_channel, var.kubernetes_cluster != null ? var.kubernetes_cluster.automatic_upgrade_channel : null)
   # node_os_upgrade_channel             = try(var.settings.node_os_upgrade_channel, var.kubernetes_cluster != null ? var.kubernetes_cluster.node_os_upgrade_channel : null)
   
   # Add-ons and features
