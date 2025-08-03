@@ -91,7 +91,7 @@ resource "azurerm_network_interface_security_group_association" "this" {
 
 # Create the Linux Virtual Machine with specified configuration
 resource "azurerm_linux_virtual_machine" "this" {
-  name                = try(var.linux_virtual_machine.name, module.vm_name.result)
+  name                = try(var.settings.name, var.linux_virtual_machine.name, module.vm_name.result)
   location            = try(var.settings.location, var.global_settings.location_name, var.linux_virtual_machine != null ? var.linux_virtual_machine.location : null)
   resource_group_name = try(var.settings.resource_group_name, local.resource_group.name, var.linux_virtual_machine != null ? var.linux_virtual_machine.resource_group_name : null)
   size                = try(var.settings.size, var.linux_virtual_machine != null ? var.linux_virtual_machine.size : null)
