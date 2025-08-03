@@ -21,11 +21,14 @@ module "name" {
 locals {
   resource_group = can(var.settings.resource_group.state_key) ? try(var.remote_states[var.settings.resource_group.state_key].resource_groups[var.settings.resource_group.key], null) : try(var.resource_groups[var.settings.resource_group.key], null)
   
-  # Resolve subnet ID from subnet_key if provided
+  # Resolve subnet using consistent pattern with resource_group
+  subnet = can(var.settings.default_node_pool.subnet.state_key) ? try(var.remote_states[var.settings.default_node_pool.subnet.state_key].subnets[var.settings.default_node_pool.subnet.key], null) : try(var.subnets[var.settings.default_node_pool.subnet.key], null)
+  
+  # Resolve subnet ID from subnet.key (consistent with resource_group pattern)
   subnet_id = try(
-    # First try to get subnet from subnets variable using subnet_key
-    var.subnets[var.settings.subnet_key].subnet.id,
-    # Then try to get it from default_node_pool.vnet_subnet_id
+    # First try to get subnet from standardized subnet lookup
+    local.subnet.subnet.id,
+    # Then fallback to explicitly provided vnet_subnet_id
     var.settings.default_node_pool.vnet_subnet_id,
     # Finally fall back to null
     null
@@ -60,8 +63,6 @@ resource "azurerm_kubernetes_cluster" "this" {
   
   # Add-ons and features
   azure_policy_enabled                = try(var.settings.azure_policy_enabled, var.kubernetes_cluster != null ? var.kubernetes_cluster.azure_policy_enabled : null)
-  # Removed deprecated: http_application_routing_enabled
-  # Removed deprecated: open_service_mesh_enabled
   workload_identity_enabled           = try(var.settings.workload_identity_enabled, var.kubernetes_cluster != null ? var.kubernetes_cluster.workload_identity_enabled : null)
   oidc_issuer_enabled                 = try(var.settings.oidc_issuer_enabled, var.kubernetes_cluster != null ? var.kubernetes_cluster.oidc_issuer_enabled : null)
   image_cleaner_enabled               = try(var.settings.image_cleaner_enabled, var.kubernetes_cluster != null ? var.kubernetes_cluster.image_cleaner_enabled : null)
