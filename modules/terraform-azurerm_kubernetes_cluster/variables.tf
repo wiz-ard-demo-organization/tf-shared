@@ -342,12 +342,7 @@ variable "kubernetes_cluster" {
       vertical_pod_autoscaler_enabled = optional(bool, false)
     }))
 
-    service_mesh_profile = optional(object({
-      mode                             = string
-      revisions                        = optional(list(string), [])
-      internal_ingress_gateway_enabled = optional(bool, false)
-      external_ingress_gateway_enabled = optional(bool, false)
-    }))
+
   })
   default = null
 }
