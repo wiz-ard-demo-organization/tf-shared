@@ -57,7 +57,7 @@ variable "kubernetes_cluster" {
     private_cluster_public_fqdn_enabled = optional(bool, false)
     role_based_access_control_enabled   = optional(bool, true)
     local_account_disabled              = optional(bool, false)
-    automatic_channel_upgrade           = optional(string)
+    automatic_upgrade_channel           = optional(string)
     azure_policy_enabled                = optional(bool, false)
     workload_identity_enabled           = optional(bool, false)
     oidc_issuer_enabled                 = optional(bool, false)
@@ -66,7 +66,7 @@ variable "kubernetes_cluster" {
     cost_analysis_enabled               = optional(bool, false)
     run_command_enabled                 = optional(bool, true)
     support_plan                        = optional(string)
-    node_os_channel_upgrade             = optional(string)
+    node_os_upgrade_channel             = optional(string)
 
     default_node_pool = optional(object({
       name                         = string
@@ -74,7 +74,7 @@ variable "kubernetes_cluster" {
       vm_size                      = string
       vnet_subnet_id               = optional(string)
       zones                        = optional(set(string))
-      enable_auto_scaling          = optional(bool, false)
+      auto_scaling_enabled         = optional(bool, false)
       min_count                    = optional(number)
       max_count                    = optional(number)
       max_pods                     = optional(number)
@@ -82,8 +82,8 @@ variable "kubernetes_cluster" {
       os_disk_type                 = optional(string, "Managed")
       ultra_ssd_enabled            = optional(bool, false)
       node_public_ip_prefix_id     = optional(string)
-      enable_host_encryption       = optional(bool, false)
-      enable_node_public_ip        = optional(bool, false)
+      host_encryption_enabled      = optional(bool, false)
+      node_public_ip_enabled       = optional(bool, false)
       kubelet_disk_type            = optional(string)
       temporary_name_for_rotation  = optional(string)
       type                         = optional(string, "VirtualMachineScaleSets")
@@ -344,6 +344,7 @@ variable "kubernetes_cluster" {
 
     service_mesh_profile = optional(object({
       mode                             = string
+      revisions                        = optional(list(string), [])
       internal_ingress_gateway_enabled = optional(bool, false)
       external_ingress_gateway_enabled = optional(bool, false)
     }))
