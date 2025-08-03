@@ -74,7 +74,7 @@ variable "kubernetes_cluster" {
       vm_size                      = string
       vnet_subnet_id               = optional(string)
       zones                        = optional(set(string))
-      auto_scaling_enabled         = optional(bool, false)
+      enable_auto_scaling          = optional(bool, false)
       min_count                    = optional(number)
       max_count                    = optional(number)
       max_pods                     = optional(number)

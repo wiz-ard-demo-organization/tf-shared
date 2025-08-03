@@ -81,7 +81,7 @@ resource "azurerm_kubernetes_cluster" "this" {
     zones                        = try(var.settings.default_node_pool.zones, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.zones : null)
     
     # Auto-scaling configuration
-    # auto_scaling_enabled         = try(var.settings.default_node_pool.auto_scaling_enabled, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.auto_scaling_enabled : null)
+    enable_auto_scaling          = try(var.settings.default_node_pool.enable_auto_scaling, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.enable_auto_scaling : null)
     min_count                    = try(var.settings.default_node_pool.min_count, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.min_count : null)
     max_count                    = try(var.settings.default_node_pool.max_count, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.max_count : null)
     
