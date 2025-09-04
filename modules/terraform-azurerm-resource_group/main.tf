@@ -20,8 +20,8 @@ module "name" {
 
 # Create the Azure Resource Group
 resource "azurerm_resource_group" "this" {
-  name     = try(var.settings.name, var.resource_group.name, module.name.result)
-  location = try(var.settings.location, var.global_settings.location_name, var.resource_group.location)
+  name     = try(var.settings.name, module.name.result)
+  location = try(var.settings.location, var.global_settings.location_name)
 
   tags = var.tags
 } 

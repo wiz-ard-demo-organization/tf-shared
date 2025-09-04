@@ -28,19 +28,6 @@ variable "remote_states" {
   description = "Outputs from the previous deployments that are stored in additional Terraform State Files"
 }
 
-variable "resource_group" {
-  description = <<EOT
-    resource_group = {
-      name : "(Optional) The name of the resource group. If not provided, will be generated using naming module."
-      location : "(Required) The Azure Region where the resource group should exist."
-    }
-  EOT
-  type = object({
-    name     = optional(string)
-    location = string
-  })
-  default = null
-}
 
 variable "tags" {
   description = "(Optional) A mapping of tags to assign to the resource group."

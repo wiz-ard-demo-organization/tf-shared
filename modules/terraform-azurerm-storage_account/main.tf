@@ -24,32 +24,32 @@ locals {
 
 # Create the main Azure Storage Account with specified configuration for blob, file, queue, and table services
 resource "azurerm_storage_account" "this" {
-  name                              = try(var.settings.name, var.storage_account != null ? var.storage_account.name : null, module.name.result)
-  resource_group_name               = try(var.settings.resource_group_name, local.resource_group.name, var.storage_account != null ? var.storage_account.resource_group_name : null)
-  location                          = try(var.settings.location, var.global_settings.location_name, var.storage_account != null ? var.storage_account.location : null)
-  account_tier                      = try(var.settings.account_tier, var.storage_account != null ? var.storage_account.account_tier : null)
-  account_replication_type          = try(var.settings.account_replication_type, var.storage_account != null ? var.storage_account.account_replication_type : null)
-  account_kind                      = try(var.settings.account_kind, var.storage_account != null ? var.storage_account.account_kind : null)
-  access_tier                       = try(var.settings.access_tier, var.storage_account != null ? var.storage_account.access_tier : null)
-  cross_tenant_replication_enabled  = try(var.settings.cross_tenant_replication_enabled, var.storage_account != null ? var.storage_account.cross_tenant_replication_enabled : null)
-  edge_zone                         = try(var.settings.edge_zone, var.storage_account != null ? var.storage_account.edge_zone : null, null)
-  min_tls_version                   = try(var.settings.min_tls_version, var.storage_account != null ? var.storage_account.min_tls_version : null)
-  allow_nested_items_to_be_public   = try(var.settings.allow_nested_items_to_be_public, var.storage_account != null ? var.storage_account.allow_nested_items_to_be_public : null)
-  shared_access_key_enabled         = try(var.settings.shared_access_key_enabled, var.storage_account != null ? var.storage_account.shared_access_key_enabled : null)
-  public_network_access_enabled     = try(var.settings.public_network_access_enabled, var.storage_account != null ? var.storage_account.public_network_access_enabled : null)
-  default_to_oauth_authentication   = try(var.settings.default_to_oauth_authentication, var.storage_account != null ? var.storage_account.default_to_oauth_authentication : null)
-  is_hns_enabled                    = try(var.settings.is_hns_enabled, var.storage_account != null ? var.storage_account.is_hns_enabled : null)
-  nfsv3_enabled                     = try(var.settings.nfsv3_enabled, var.storage_account != null ? var.storage_account.nfsv3_enabled : null)
-  large_file_share_enabled          = try(var.settings.large_file_share_enabled, var.storage_account != null ? var.storage_account.large_file_share_enabled : null)
-  queue_encryption_key_type         = try(var.settings.queue_encryption_key_type, var.storage_account != null ? var.storage_account.queue_encryption_key_type : null)
-  table_encryption_key_type         = try(var.settings.table_encryption_key_type, var.storage_account != null ? var.storage_account.table_encryption_key_type : null)
-  infrastructure_encryption_enabled = try(var.settings.infrastructure_encryption_enabled, var.storage_account != null ? var.storage_account.infrastructure_encryption_enabled : null)
-  sftp_enabled                      = try(var.settings.sftp_enabled, var.storage_account != null ? var.storage_account.sftp_enabled : null)
-  dns_endpoint_type                 = try(var.settings.dns_endpoint_type, var.storage_account != null ? var.storage_account.dns_endpoint_type : null)
+  name                              = try(var.settings.name, module.name.result)
+  resource_group_name               = try(var.settings.resource_group_name, local.resource_group.name)
+  location                          = try(var.settings.location, var.global_settings.location_name)
+  account_tier                      = try(var.settings.account_tier, null)
+  account_replication_type          = try(var.settings.account_replication_type, null)
+  account_kind                      = try(var.settings.account_kind, null)
+  access_tier                       = try(var.settings.access_tier, null)
+  cross_tenant_replication_enabled  = try(var.settings.cross_tenant_replication_enabled, null)
+  edge_zone                         = try(var.settings.edge_zone, null)
+  min_tls_version                   = try(var.settings.min_tls_version, null)
+  allow_nested_items_to_be_public   = try(var.settings.allow_nested_items_to_be_public, null)
+  shared_access_key_enabled         = try(var.settings.shared_access_key_enabled, null)
+  public_network_access_enabled     = try(var.settings.public_network_access_enabled, null)
+  default_to_oauth_authentication   = try(var.settings.default_to_oauth_authentication, null)
+  is_hns_enabled                    = try(var.settings.is_hns_enabled, null)
+  nfsv3_enabled                     = try(var.settings.nfsv3_enabled, null)
+  large_file_share_enabled          = try(var.settings.large_file_share_enabled, null)
+  queue_encryption_key_type         = try(var.settings.queue_encryption_key_type, null)
+  table_encryption_key_type         = try(var.settings.table_encryption_key_type, null)
+  infrastructure_encryption_enabled = try(var.settings.infrastructure_encryption_enabled, null)
+  sftp_enabled                      = try(var.settings.sftp_enabled, null)
+  dns_endpoint_type                 = try(var.settings.dns_endpoint_type, null)
 
   # Configure custom domain for storage account endpoints
   dynamic "custom_domain" {
-    for_each = try(var.settings.custom_domain, var.storage_account != null ? var.storage_account.custom_domain : null, null) != null ? [try(var.settings.custom_domain, var.storage_account.custom_domain)] : []
+    for_each = try(var.settings.custom_domain, null) != null ? [var.settings.custom_domain] : []
     content {
       name          = custom_domain.value.name
       use_subdomain = custom_domain.value.use_subdomain
@@ -58,7 +58,7 @@ resource "azurerm_storage_account" "this" {
 
   # Configure customer-managed encryption keys for enhanced security
   dynamic "customer_managed_key" {
-    for_each = try(var.settings.customer_managed_key, var.storage_account != null ? var.storage_account.customer_managed_key : null, null) != null ? [try(var.settings.customer_managed_key, var.storage_account.customer_managed_key)] : []
+    for_each = try(var.settings.customer_managed_key, null) != null ? [var.settings.customer_managed_key] : []
     content {
       key_vault_key_id          = customer_managed_key.value.key_vault_key_id
       user_assigned_identity_id = customer_managed_key.value.user_assigned_identity_id
@@ -67,7 +67,7 @@ resource "azurerm_storage_account" "this" {
 
   # Configure managed identity for the storage account
   dynamic "identity" {
-    for_each = try(var.settings.identity, var.storage_account != null ? var.storage_account.identity : null, null) != null ? [try(var.settings.identity, var.storage_account.identity)] : []
+    for_each = try(var.settings.identity, null) != null ? [var.settings.identity] : []
     content {
       type         = identity.value.type
       identity_ids = identity.value.identity_ids
@@ -76,7 +76,7 @@ resource "azurerm_storage_account" "this" {
 
   # Configure blob service properties including versioning, change feed, and lifecycle policies
   dynamic "blob_properties" {
-    for_each = try(var.settings.blob_properties, var.storage_account != null ? var.storage_account.blob_properties : null, null) != null ? [try(var.settings.blob_properties, var.storage_account.blob_properties)] : []
+    for_each = try(var.settings.blob_properties, null) != null ? [var.settings.blob_properties] : []
     content {
       versioning_enabled       = blob_properties.value.versioning_enabled
       change_feed_enabled      = blob_properties.value.change_feed_enabled
@@ -124,7 +124,7 @@ resource "azurerm_storage_account" "this" {
 
   # Configure queue service properties including logging and metrics
   dynamic "queue_properties" {
-    for_each = try(var.settings.queue_properties, var.storage_account != null ? var.storage_account.queue_properties : null, null) != null ? [try(var.settings.queue_properties, var.storage_account.queue_properties)] : []
+    for_each = try(var.settings.queue_properties, null) != null ? [var.settings.queue_properties] : []
     content {
       # Configure CORS rules for queue service
       dynamic "cors_rule" {
@@ -176,7 +176,7 @@ resource "azurerm_storage_account" "this" {
 
   # Configure static website hosting capabilities
   dynamic "static_website" {
-    for_each = try(var.settings.static_website, var.storage_account != null ? var.storage_account.static_website : null, null) != null ? [try(var.settings.static_website, var.storage_account.static_website)] : []
+    for_each = try(var.settings.static_website, null) != null ? [var.settings.static_website] : []
     content {
       index_document     = static_website.value.index_document
       error_404_document = static_website.value.error_404_document
@@ -185,7 +185,7 @@ resource "azurerm_storage_account" "this" {
 
   # Configure file share properties including SMB settings
   dynamic "share_properties" {
-    for_each = try(var.settings.share_properties, var.storage_account != null ? var.storage_account.share_properties : null, null) != null ? [try(var.settings.share_properties, var.storage_account.share_properties)] : []
+    for_each = try(var.settings.share_properties, null) != null ? [var.settings.share_properties] : []
     content {
       # Configure CORS rules for file service
       dynamic "cors_rule" {
@@ -223,7 +223,7 @@ resource "azurerm_storage_account" "this" {
 
   # Configure network access rules and firewall settings
   dynamic "network_rules" {
-    for_each = try(var.settings.network_rules, var.storage_account != null ? var.storage_account.network_rules : null, null) != null ? [try(var.settings.network_rules, var.storage_account.network_rules)] : []
+    for_each = try(var.settings.network_rules, null) != null ? [var.settings.network_rules] : []
     content {
       default_action             = network_rules.value.default_action
       bypass                     = network_rules.value.bypass
@@ -243,7 +243,7 @@ resource "azurerm_storage_account" "this" {
 
   # Configure Azure Files authentication with Active Directory
   dynamic "azure_files_authentication" {
-    for_each = try(var.settings.azure_files_authentication, var.storage_account != null ? var.storage_account.azure_files_authentication : null, null) != null ? [try(var.settings.azure_files_authentication, var.storage_account.azure_files_authentication)] : []
+    for_each = try(var.settings.azure_files_authentication, null) != null ? [var.settings.azure_files_authentication] : []
     content {
       directory_type = azure_files_authentication.value.directory_type
 
@@ -264,7 +264,7 @@ resource "azurerm_storage_account" "this" {
 
   # Configure routing preferences for data traffic
   dynamic "routing" {
-    for_each = try(var.settings.routing, var.storage_account != null ? var.storage_account.routing : null, null) != null ? [try(var.settings.routing, var.storage_account.routing)] : []
+    for_each = try(var.settings.routing, null) != null ? [var.settings.routing] : []
     content {
       publish_internet_endpoints  = routing.value.publish_internet_endpoints
       publish_microsoft_endpoints = routing.value.publish_microsoft_endpoints
@@ -274,7 +274,7 @@ resource "azurerm_storage_account" "this" {
 
   # Configure immutability policy for compliance requirements
   dynamic "immutability_policy" {
-    for_each = try(var.settings.immutability_policy, var.storage_account != null ? var.storage_account.immutability_policy : null, null) != null ? [try(var.settings.immutability_policy, var.storage_account.immutability_policy)] : []
+    for_each = try(var.settings.immutability_policy, null) != null ? [var.settings.immutability_policy] : []
     content {
       allow_protected_append_writes = immutability_policy.value.allow_protected_append_writes
       state                         = immutability_policy.value.state
@@ -284,7 +284,7 @@ resource "azurerm_storage_account" "this" {
 
   # Configure SAS token policy settings
   dynamic "sas_policy" {
-    for_each = try(var.settings.sas_policy, var.storage_account != null ? var.storage_account.sas_policy : null, null) != null ? [try(var.settings.sas_policy, var.storage_account.sas_policy)] : []
+    for_each = try(var.settings.sas_policy, null) != null ? [var.settings.sas_policy] : []
     content {
       expiration_period = sas_policy.value.expiration_period
       expiration_action = sas_policy.value.expiration_action

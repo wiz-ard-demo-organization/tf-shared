@@ -24,18 +24,18 @@ locals {
 
 # Create the Azure Container Registry with specified configuration
 resource "azurerm_container_registry" "this" {
-  name                          = try(var.settings.name, var.container_registry != null ? var.container_registry.name : null, module.name.result)
-  resource_group_name           = try(var.settings.resource_group_name, local.resource_group.name, var.container_registry != null ? var.container_registry.resource_group_name : null)
-  location                      = try(var.settings.location, var.global_settings.location_name, var.container_registry != null ? var.container_registry.location : null)
-  sku                           = try(var.settings.sku, var.container_registry != null ? var.container_registry.sku : null)
-  admin_enabled                 = try(var.settings.admin_enabled, var.container_registry != null ? var.container_registry.admin_enabled : null)
-  public_network_access_enabled = try(var.settings.public_network_access_enabled, var.container_registry != null ? var.container_registry.public_network_access_enabled : null)
-  quarantine_policy_enabled     = try(var.settings.quarantine_policy_enabled, var.container_registry != null ? var.container_registry.quarantine_policy_enabled : null)
-  zone_redundancy_enabled       = try(var.settings.zone_redundancy_enabled, var.container_registry != null ? var.container_registry.zone_redundancy_enabled : null)
-  export_policy_enabled         = try(var.settings.export_policy_enabled, var.container_registry != null ? var.container_registry.export_policy_enabled : null)
-  anonymous_pull_enabled        = try(var.settings.anonymous_pull_enabled, var.container_registry != null ? var.container_registry.anonymous_pull_enabled : null)
-  data_endpoint_enabled         = try(var.settings.data_endpoint_enabled, var.container_registry != null ? var.container_registry.data_endpoint_enabled : null)
-  network_rule_bypass_option    = try(var.settings.network_rule_bypass_option, var.container_registry != null ? var.container_registry.network_rule_bypass_option : null)
+  name                          = try(var.settings.name, module.name.result)
+  resource_group_name           = try(var.settings.resource_group_name, local.resource_group.name)
+  location                      = try(var.settings.location, var.global_settings.location_name)
+  sku                           = try(var.settings.sku, null)
+  admin_enabled                 = try(var.settings.admin_enabled, null)
+  public_network_access_enabled = try(var.settings.public_network_access_enabled, null)
+  quarantine_policy_enabled     = try(var.settings.quarantine_policy_enabled, null)
+  zone_redundancy_enabled       = try(var.settings.zone_redundancy_enabled, null)
+  export_policy_enabled         = try(var.settings.export_policy_enabled, null)
+  anonymous_pull_enabled        = try(var.settings.anonymous_pull_enabled, null)
+  data_endpoint_enabled         = try(var.settings.data_endpoint_enabled, null)
+  network_rule_bypass_option    = try(var.settings.network_rule_bypass_option, null)
 
   # Configure geo-replication for Premium SKUs
   dynamic "georeplications" {
@@ -50,7 +50,7 @@ resource "azurerm_container_registry" "this" {
 
   # Configure network access rules for Premium SKUs
   dynamic "network_rule_set" {
-    for_each = try(var.settings.network_rule_set, var.container_registry != null ? var.container_registry.network_rule_set : null, null) != null ? [try(var.settings.network_rule_set, var.container_registry.network_rule_set)] : []
+    for_each = try(var.settings.network_rule_set, null) != null ? [var.settings.network_rule_set] : []
     content {
       default_action = network_rule_set.value.default_action
 
@@ -67,7 +67,7 @@ resource "azurerm_container_registry" "this" {
 
   # Configure managed identity for the container registry
   dynamic "identity" {
-    for_each = try(var.settings.identity, var.container_registry != null ? var.container_registry.identity : null, null) != null ? [try(var.settings.identity, var.container_registry.identity)] : []
+    for_each = try(var.settings.identity, null) != null ? [var.settings.identity] : []
     content {
       type         = identity.value.type
       identity_ids = identity.value.identity_ids
@@ -76,7 +76,7 @@ resource "azurerm_container_registry" "this" {
 
   # Configure customer-managed encryption for Premium SKUs
   dynamic "encryption" {
-    for_each = try(var.settings.encryption, var.container_registry != null ? var.container_registry.encryption : null, null) != null ? [try(var.settings.encryption, var.container_registry.encryption)] : []
+    for_each = try(var.settings.encryption, null) != null ? [var.settings.encryption] : []
     content {
       key_vault_key_id   = encryption.value.key_vault_key_id
       identity_client_id = encryption.value.identity_client_id

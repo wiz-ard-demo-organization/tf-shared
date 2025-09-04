@@ -38,85 +38,85 @@ locals {
 # Create the AKS cluster with specified configuration for container orchestration
 resource "azurerm_kubernetes_cluster" "this" {
   # Core cluster configuration
-  name                                = try(var.settings.name, var.kubernetes_cluster != null ? var.kubernetes_cluster.name : null, module.name.result)
-  location                            = try(var.settings.location, var.global_settings.location_name, var.kubernetes_cluster != null ? var.kubernetes_cluster.location : null)
-  resource_group_name                 = try(var.settings.resource_group_name, local.resource_group.name, var.kubernetes_cluster != null ? var.kubernetes_cluster.resource_group_name : null)
-  dns_prefix                          = try(var.settings.dns_prefix, var.kubernetes_cluster != null ? var.kubernetes_cluster.dns_prefix : null)
-  dns_prefix_private_cluster          = try(var.settings.dns_prefix_private_cluster, var.kubernetes_cluster != null ? var.kubernetes_cluster.dns_prefix_private_cluster : null)
-  kubernetes_version                  = try(var.settings.kubernetes_version, var.kubernetes_cluster != null ? var.kubernetes_cluster.kubernetes_version : null)
-  sku_tier                            = try(var.settings.sku_tier, var.kubernetes_cluster != null ? var.kubernetes_cluster.sku_tier : null)
+  name                                = try(var.settings.name, module.name.result)
+  location                            = try(var.settings.location, var.global_settings.location_name)
+  resource_group_name                 = try(var.settings.resource_group_name, local.resource_group.name)
+  dns_prefix                          = try(var.settings.dns_prefix, null)
+  dns_prefix_private_cluster          = try(var.settings.dns_prefix_private_cluster, null)
+  kubernetes_version                  = try(var.settings.kubernetes_version, null)
+  sku_tier                            = try(var.settings.sku_tier, null)
   
   # Network and security configuration
-  node_resource_group                 = try(var.settings.node_resource_group, var.kubernetes_cluster != null ? var.kubernetes_cluster.node_resource_group : null)
-  disk_encryption_set_id              = try(var.settings.disk_encryption_set_id, var.kubernetes_cluster != null ? var.kubernetes_cluster.disk_encryption_set_id : null)
-  private_cluster_enabled             = try(var.settings.private_cluster_enabled, var.kubernetes_cluster != null ? var.kubernetes_cluster.private_cluster_enabled : null)
-  private_dns_zone_id                 = try(var.settings.private_dns_zone_id, var.kubernetes_cluster != null ? var.kubernetes_cluster.private_dns_zone_id : null)
-  private_cluster_public_fqdn_enabled = try(var.settings.private_cluster_public_fqdn_enabled, var.kubernetes_cluster != null ? var.kubernetes_cluster.private_cluster_public_fqdn_enabled : null)
+  node_resource_group                 = try(var.settings.node_resource_group, null)
+  disk_encryption_set_id              = try(var.settings.disk_encryption_set_id, null)
+  private_cluster_enabled             = try(var.settings.private_cluster_enabled, null)
+  private_dns_zone_id                 = try(var.settings.private_dns_zone_id, null)
+  private_cluster_public_fqdn_enabled = try(var.settings.private_cluster_public_fqdn_enabled, null)
   
   # Access control and authentication
-  role_based_access_control_enabled   = try(var.settings.role_based_access_control_enabled, var.kubernetes_cluster != null ? var.kubernetes_cluster.role_based_access_control_enabled : null)
-  local_account_disabled              = try(var.settings.local_account_disabled, var.kubernetes_cluster != null ? var.kubernetes_cluster.local_account_disabled : null)
+  role_based_access_control_enabled   = try(var.settings.role_based_access_control_enabled, null)
+  local_account_disabled              = try(var.settings.local_account_disabled, null)
   
   # Upgrade and maintenance settings
-  # automatic_upgrade_channel           = try(var.settings.automatic_upgrade_channel, var.kubernetes_cluster != null ? var.kubernetes_cluster.automatic_upgrade_channel : null)
-  # node_os_upgrade_channel             = try(var.settings.node_os_upgrade_channel, var.kubernetes_cluster != null ? var.kubernetes_cluster.node_os_upgrade_channel : null)
+  # automatic_upgrade_channel           = try(var.settings.automatic_upgrade_channel, null)
+  # node_os_upgrade_channel             = try(var.settings.node_os_upgrade_channel, null)
   
   # Add-ons and features
-  azure_policy_enabled                = try(var.settings.azure_policy_enabled, var.kubernetes_cluster != null ? var.kubernetes_cluster.azure_policy_enabled : null)
-  workload_identity_enabled           = try(var.settings.workload_identity_enabled, var.kubernetes_cluster != null ? var.kubernetes_cluster.workload_identity_enabled : null)
-  oidc_issuer_enabled                 = try(var.settings.oidc_issuer_enabled, var.kubernetes_cluster != null ? var.kubernetes_cluster.oidc_issuer_enabled : null)
-  image_cleaner_enabled               = try(var.settings.image_cleaner_enabled, var.kubernetes_cluster != null ? var.kubernetes_cluster.image_cleaner_enabled : null)
-  image_cleaner_interval_hours        = try(var.settings.image_cleaner_interval_hours, var.kubernetes_cluster != null ? var.kubernetes_cluster.image_cleaner_interval_hours : null)
-  cost_analysis_enabled               = try(var.settings.cost_analysis_enabled, var.kubernetes_cluster != null ? var.kubernetes_cluster.cost_analysis_enabled : null)
-  run_command_enabled                 = try(var.settings.run_command_enabled, var.kubernetes_cluster != null ? var.kubernetes_cluster.run_command_enabled : null)
-  support_plan                        = try(var.settings.support_plan, var.kubernetes_cluster != null ? var.kubernetes_cluster.support_plan : null)
+  azure_policy_enabled                = try(var.settings.azure_policy_enabled, null)
+  workload_identity_enabled           = try(var.settings.workload_identity_enabled, null)
+  oidc_issuer_enabled                 = try(var.settings.oidc_issuer_enabled, null)
+  image_cleaner_enabled               = try(var.settings.image_cleaner_enabled, null)
+  image_cleaner_interval_hours        = try(var.settings.image_cleaner_interval_hours, null)
+  cost_analysis_enabled               = try(var.settings.cost_analysis_enabled, null)
+  run_command_enabled                 = try(var.settings.run_command_enabled, null)
+  support_plan                        = try(var.settings.support_plan, null)
 
   # Default Node Pool configuration - required system node pool for cluster operation
   default_node_pool {
     # Basic node pool settings
-    name                         = try(var.settings.default_node_pool.name, var.kubernetes_cluster.default_node_pool.name)
-    node_count                   = try(var.settings.default_node_pool.node_count, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.node_count : null)
-    vm_size                      = try(var.settings.default_node_pool.vm_size, var.kubernetes_cluster.default_node_pool.vm_size)
-    vnet_subnet_id               = try(local.subnet_id, var.settings.default_node_pool.vnet_subnet_id, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.vnet_subnet_id : null)
-    zones                        = try(var.settings.default_node_pool.zones, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.zones : null)
+    name                         = try(var.settings.default_node_pool.name, null)
+    node_count                   = try(var.settings.default_node_pool.node_count, null)
+    vm_size                      = try(var.settings.default_node_pool.vm_size, null)
+    vnet_subnet_id               = try(local.subnet_id, var.settings.default_node_pool.vnet_subnet_id, null)
+    zones                        = try(var.settings.default_node_pool.zones, null)
     
     # Auto-scaling configuration
-    enable_auto_scaling          = try(var.settings.default_node_pool.enable_auto_scaling, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.enable_auto_scaling : null)
-    min_count                    = try(var.settings.default_node_pool.min_count, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.min_count : null)
-    max_count                    = try(var.settings.default_node_pool.max_count, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.max_count : null)
+    enable_auto_scaling          = try(var.settings.default_node_pool.enable_auto_scaling, null)
+    min_count                    = try(var.settings.default_node_pool.min_count, null)
+    max_count                    = try(var.settings.default_node_pool.max_count, null)
     
     # Pod and storage configuration
-    max_pods                     = try(var.settings.default_node_pool.max_pods, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.max_pods : null)
-    os_disk_size_gb              = try(var.settings.default_node_pool.os_disk_size_gb, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.os_disk_size_gb : null)
-    os_disk_type                 = try(var.settings.default_node_pool.os_disk_type, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.os_disk_type : null)
-    ultra_ssd_enabled            = try(var.settings.default_node_pool.ultra_ssd_enabled, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.ultra_ssd_enabled : null)
-    kubelet_disk_type            = try(var.settings.default_node_pool.kubelet_disk_type, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.kubelet_disk_type : null)
+    max_pods                     = try(var.settings.default_node_pool.max_pods, null)
+    os_disk_size_gb              = try(var.settings.default_node_pool.os_disk_size_gb, null)
+    os_disk_type                 = try(var.settings.default_node_pool.os_disk_type, null)
+    ultra_ssd_enabled            = try(var.settings.default_node_pool.ultra_ssd_enabled, null)
+    kubelet_disk_type            = try(var.settings.default_node_pool.kubelet_disk_type, null)
     
     # Network settings
-    node_public_ip_prefix_id     = try(var.settings.default_node_pool.node_public_ip_prefix_id, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.node_public_ip_prefix_id : null)
-    # node_public_ip_enabled       = try(var.settings.default_node_pool.node_public_ip_enabled, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.node_public_ip_enabled : null)
-    pod_subnet_id                = try(var.settings.default_node_pool.pod_subnet_id, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.pod_subnet_id : null)
+    node_public_ip_prefix_id     = try(var.settings.default_node_pool.node_public_ip_prefix_id, null)
+    # node_public_ip_enabled       = try(var.settings.default_node_pool.node_public_ip_enabled, null)
+    pod_subnet_id                = try(var.settings.default_node_pool.pod_subnet_id, null)
     
     # Security and encryption
-    # host_encryption_enabled      = try(var.settings.default_node_pool.host_encryption_enabled, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.host_encryption_enabled : null)
-    fips_enabled                 = try(var.settings.default_node_pool.fips_enabled, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.fips_enabled : null)
+    # host_encryption_enabled      = try(var.settings.default_node_pool.host_encryption_enabled, null)
+    fips_enabled                 = try(var.settings.default_node_pool.fips_enabled, null)
     
     # Advanced configuration
-    temporary_name_for_rotation  = try(var.settings.default_node_pool.temporary_name_for_rotation, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.temporary_name_for_rotation : null)
-    type                         = try(var.settings.default_node_pool.type, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.type : null)
-    orchestrator_version         = try(var.settings.default_node_pool.orchestrator_version, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.orchestrator_version : null)
-    proximity_placement_group_id = try(var.settings.default_node_pool.proximity_placement_group_id, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.proximity_placement_group_id : null)
-    workload_runtime             = try(var.settings.default_node_pool.workload_runtime, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.workload_runtime : null)
-    only_critical_addons_enabled = try(var.settings.default_node_pool.only_critical_addons_enabled, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.only_critical_addons_enabled : null)
-    scale_down_mode              = try(var.settings.default_node_pool.scale_down_mode, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.scale_down_mode : null)
-    snapshot_id                  = try(var.settings.default_node_pool.snapshot_id, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.snapshot_id : null)
-    host_group_id                = try(var.settings.default_node_pool.host_group_id, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.host_group_id : null)
-    capacity_reservation_group_id = try(var.settings.default_node_pool.capacity_reservation_group_id, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.capacity_reservation_group_id : null)
-    node_labels                  = try(var.settings.default_node_pool.node_labels, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.node_labels : null)
+    temporary_name_for_rotation  = try(var.settings.default_node_pool.temporary_name_for_rotation, null)
+    type                         = try(var.settings.default_node_pool.type, null)
+    orchestrator_version         = try(var.settings.default_node_pool.orchestrator_version, null)
+    proximity_placement_group_id = try(var.settings.default_node_pool.proximity_placement_group_id, null)
+    workload_runtime             = try(var.settings.default_node_pool.workload_runtime, null)
+    only_critical_addons_enabled = try(var.settings.default_node_pool.only_critical_addons_enabled, null)
+    scale_down_mode              = try(var.settings.default_node_pool.scale_down_mode, null)
+    snapshot_id                  = try(var.settings.default_node_pool.snapshot_id, null)
+    host_group_id                = try(var.settings.default_node_pool.host_group_id, null)
+    capacity_reservation_group_id = try(var.settings.default_node_pool.capacity_reservation_group_id, null)
+    node_labels                  = try(var.settings.default_node_pool.node_labels, null)
 
     # Kubelet configuration for container runtime tuning
     dynamic "kubelet_config" {
-      for_each = try(var.settings.default_node_pool.kubelet_config, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.kubelet_config : null, null) != null ? [try(var.settings.default_node_pool.kubelet_config, var.kubernetes_cluster.default_node_pool.kubelet_config)] : []
+      for_each = try(var.settings.default_node_pool.kubelet_config, null) != null ? [var.settings.default_node_pool.kubelet_config] : []
       content {
         allowed_unsafe_sysctls    = kubelet_config.value.allowed_unsafe_sysctls
         container_log_max_line    = kubelet_config.value.container_log_max_line
@@ -133,7 +133,7 @@ resource "azurerm_kubernetes_cluster" "this" {
 
     # Linux OS configuration for kernel tuning
     dynamic "linux_os_config" {
-      for_each = try(var.settings.default_node_pool.linux_os_config, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.linux_os_config : null, null) != null ? [try(var.settings.default_node_pool.linux_os_config, var.kubernetes_cluster.default_node_pool.linux_os_config)] : []
+      for_each = try(var.settings.default_node_pool.linux_os_config, null) != null ? [var.settings.default_node_pool.linux_os_config] : []
       content {
         swap_file_size_mb             = linux_os_config.value.swap_file_size_mb
         transparent_huge_page_enabled = linux_os_config.value.transparent_huge_page_enabled
@@ -179,7 +179,7 @@ resource "azurerm_kubernetes_cluster" "this" {
 
     # Node network profile for security group and IP tag configuration
     dynamic "node_network_profile" {
-      for_each = try(var.settings.default_node_pool.node_network_profile, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.node_network_profile : null, null) != null ? [try(var.settings.default_node_pool.node_network_profile, var.kubernetes_cluster.default_node_pool.node_network_profile)] : []
+      for_each = try(var.settings.default_node_pool.node_network_profile, null) != null ? [var.settings.default_node_pool.node_network_profile] : []
       content {
         application_security_group_ids = node_network_profile.value.application_security_group_ids
         node_public_ip_tags           = node_network_profile.value.node_public_ip_tags
@@ -188,7 +188,7 @@ resource "azurerm_kubernetes_cluster" "this" {
 
     # Upgrade settings for controlled node pool updates
     dynamic "upgrade_settings" {
-      for_each = try(var.settings.default_node_pool.upgrade_settings, var.kubernetes_cluster != null ? var.kubernetes_cluster.default_node_pool.upgrade_settings : null, null) != null ? [try(var.settings.default_node_pool.upgrade_settings, var.kubernetes_cluster.default_node_pool.upgrade_settings)] : []
+      for_each = try(var.settings.default_node_pool.upgrade_settings, null) != null ? [var.settings.default_node_pool.upgrade_settings] : []
       content {
         drain_timeout_in_minutes      = upgrade_settings.value.drain_timeout_in_minutes
         node_soak_duration_in_minutes = upgrade_settings.value.node_soak_duration_in_minutes
@@ -201,7 +201,7 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   # Network Profile - defines cluster networking architecture and policies
   dynamic "network_profile" {
-    for_each = try(var.settings.network_profile, var.kubernetes_cluster != null ? var.kubernetes_cluster.network_profile : null, null) != null ? [try(var.settings.network_profile, var.kubernetes_cluster.network_profile)] : []
+    for_each = try(var.settings.network_profile, null) != null ? [var.settings.network_profile] : []
     content {
       # Core networking configuration
       network_plugin      = network_profile.value.network_plugin
@@ -238,7 +238,7 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   # Identity configuration for managed identity authentication
   dynamic "identity" {
-    for_each = try(var.settings.identity, var.kubernetes_cluster != null ? var.kubernetes_cluster.identity : null, null) != null ? [try(var.settings.identity, var.kubernetes_cluster.identity)] : []
+    for_each = try(var.settings.identity, null) != null ? [var.settings.identity] : []
     content {
       type         = identity.value.type
       identity_ids = try(identity.value.identity_ids, null)
@@ -247,7 +247,7 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   # Service Principal configuration for legacy authentication (prefer managed identity)
   dynamic "service_principal" {
-    for_each = try(var.settings.service_principal, var.kubernetes_cluster != null ? var.kubernetes_cluster.service_principal : null, null) != null ? [try(var.settings.service_principal, var.kubernetes_cluster.service_principal)] : []
+    for_each = try(var.settings.service_principal, null) != null ? [var.settings.service_principal] : []
     content {
       client_id     = service_principal.value.client_id
       client_secret = service_principal.value.client_secret
@@ -256,7 +256,7 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   # Auto Scaler Profile - configures cluster autoscaler behavior
   dynamic "auto_scaler_profile" {
-    for_each = try(var.settings.auto_scaler_profile, var.kubernetes_cluster != null ? var.kubernetes_cluster.auto_scaler_profile : null, null) != null ? [try(var.settings.auto_scaler_profile, var.kubernetes_cluster.auto_scaler_profile)] : []
+    for_each = try(var.settings.auto_scaler_profile, null) != null ? [var.settings.auto_scaler_profile] : []
     content {
       balance_similar_node_groups      = auto_scaler_profile.value.balance_similar_node_groups
       expander                         = auto_scaler_profile.value.expander
@@ -280,7 +280,7 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   # API Server Access Profile - controls API server network accessibility
   dynamic "api_server_access_profile" {
-    for_each = try(var.settings.api_server_access_profile, var.kubernetes_cluster != null ? var.kubernetes_cluster.api_server_access_profile : null, null) != null ? [try(var.settings.api_server_access_profile, var.kubernetes_cluster.api_server_access_profile)] : []
+    for_each = try(var.settings.api_server_access_profile, null) != null ? [var.settings.api_server_access_profile] : []
     content {
       authorized_ip_ranges     = api_server_access_profile.value.authorized_ip_ranges
     }
@@ -288,7 +288,7 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   # Azure Active Directory Role Based Access Control for cluster authentication
   dynamic "azure_active_directory_role_based_access_control" {
-    for_each = try(var.settings.azure_active_directory_role_based_access_control, var.kubernetes_cluster != null ? var.kubernetes_cluster.azure_active_directory_role_based_access_control : null, null) != null ? [try(var.settings.azure_active_directory_role_based_access_control, var.kubernetes_cluster.azure_active_directory_role_based_access_control)] : []
+    for_each = try(var.settings.azure_active_directory_role_based_access_control, null) != null ? [var.settings.azure_active_directory_role_based_access_control] : []
     content {
       tenant_id              = try(azure_active_directory_role_based_access_control.value.tenant_id, null)
       admin_group_object_ids = try(azure_active_directory_role_based_access_control.value.admin_group_object_ids, null)
@@ -299,7 +299,7 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   # HTTP Proxy Config - configures proxy settings for cluster egress traffic
   dynamic "http_proxy_config" {
-    for_each = try(var.settings.http_proxy_config, var.kubernetes_cluster != null ? var.kubernetes_cluster.http_proxy_config : null, null) != null ? [try(var.settings.http_proxy_config, var.kubernetes_cluster.http_proxy_config)] : []
+    for_each = try(var.settings.http_proxy_config, null) != null ? [var.settings.http_proxy_config] : []
     content {
       http_proxy  = http_proxy_config.value.http_proxy
       https_proxy = http_proxy_config.value.https_proxy
@@ -310,7 +310,7 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   # OMS Agent - enables Azure Monitor for containers
   dynamic "oms_agent" {
-    for_each = try(var.settings.oms_agent, var.kubernetes_cluster != null ? var.kubernetes_cluster.oms_agent : null, null) != null ? [try(var.settings.oms_agent, var.kubernetes_cluster.oms_agent)] : []
+    for_each = try(var.settings.oms_agent, null) != null ? [var.settings.oms_agent] : []
     content {
       log_analytics_workspace_id      = oms_agent.value.log_analytics_workspace_id
       msi_auth_for_monitoring_enabled = oms_agent.value.msi_auth_for_monitoring_enabled
@@ -319,7 +319,7 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   # Ingress Application Gateway - integrates Azure Application Gateway as ingress controller
   dynamic "ingress_application_gateway" {
-    for_each = try(var.settings.ingress_application_gateway, var.kubernetes_cluster != null ? var.kubernetes_cluster.ingress_application_gateway : null, null) != null ? [try(var.settings.ingress_application_gateway, var.kubernetes_cluster.ingress_application_gateway)] : []
+    for_each = try(var.settings.ingress_application_gateway, null) != null ? [var.settings.ingress_application_gateway] : []
     content {
       gateway_id   = ingress_application_gateway.value.gateway_id
       gateway_name = ingress_application_gateway.value.gateway_name
@@ -330,7 +330,7 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   # Key Vault Secrets Provider - enables secrets store CSI driver for Azure Key Vault
   dynamic "key_vault_secrets_provider" {
-    for_each = try(var.settings.key_vault_secrets_provider, var.kubernetes_cluster != null ? var.kubernetes_cluster.key_vault_secrets_provider : null, null) != null ? [try(var.settings.key_vault_secrets_provider, var.kubernetes_cluster.key_vault_secrets_provider)] : []
+    for_each = try(var.settings.key_vault_secrets_provider, null) != null ? [var.settings.key_vault_secrets_provider] : []
     content {
       secret_rotation_enabled  = key_vault_secrets_provider.value.secret_rotation_enabled
       secret_rotation_interval = key_vault_secrets_provider.value.secret_rotation_interval
@@ -339,7 +339,7 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   # Linux Profile - SSH configuration for Linux nodes
   dynamic "linux_profile" {
-    for_each = try(var.settings.linux_profile, var.kubernetes_cluster != null ? var.kubernetes_cluster.linux_profile : null, null) != null ? [try(var.settings.linux_profile, var.kubernetes_cluster.linux_profile)] : []
+    for_each = try(var.settings.linux_profile, null) != null ? [var.settings.linux_profile] : []
     content {
       admin_username = linux_profile.value.admin_username
 
@@ -351,7 +351,7 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   # Windows Profile - configuration for Windows node pools
   dynamic "windows_profile" {
-    for_each = try(var.settings.windows_profile, var.kubernetes_cluster != null ? var.kubernetes_cluster.windows_profile : null, null) != null ? [try(var.settings.windows_profile, var.kubernetes_cluster.windows_profile)] : []
+    for_each = try(var.settings.windows_profile, null) != null ? [var.settings.windows_profile] : []
     content {
       admin_username = windows_profile.value.admin_username
       admin_password = windows_profile.value.admin_password
@@ -370,7 +370,7 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   # Maintenance Window - defines allowed times for cluster maintenance
   dynamic "maintenance_window" {
-    for_each = try(var.settings.maintenance_window, var.kubernetes_cluster != null ? var.kubernetes_cluster.maintenance_window : null, null) != null ? [try(var.settings.maintenance_window, var.kubernetes_cluster.maintenance_window)] : []
+    for_each = try(var.settings.maintenance_window, null) != null ? [var.settings.maintenance_window] : []
     content {
       # Allowed maintenance windows
       dynamic "allowed" {
@@ -394,7 +394,7 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   # Maintenance Window Auto Upgrade - schedule for automatic cluster upgrades
   dynamic "maintenance_window_auto_upgrade" {
-    for_each = try(var.settings.maintenance_window_auto_upgrade, var.kubernetes_cluster != null ? var.kubernetes_cluster.maintenance_window_auto_upgrade : null, null) != null ? [try(var.settings.maintenance_window_auto_upgrade, var.kubernetes_cluster.maintenance_window_auto_upgrade)] : []
+    for_each = try(var.settings.maintenance_window_auto_upgrade, null) != null ? [var.settings.maintenance_window_auto_upgrade] : []
     content {
       frequency   = maintenance_window_auto_upgrade.value.frequency
       interval    = maintenance_window_auto_upgrade.value.interval
@@ -419,7 +419,7 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   # Maintenance Window Node OS - schedule for node OS updates
   dynamic "maintenance_window_node_os" {
-    for_each = try(var.settings.maintenance_window_node_os, var.kubernetes_cluster != null ? var.kubernetes_cluster.maintenance_window_node_os : null, null) != null ? [try(var.settings.maintenance_window_node_os, var.kubernetes_cluster.maintenance_window_node_os)] : []
+    for_each = try(var.settings.maintenance_window_node_os, null) != null ? [var.settings.maintenance_window_node_os] : []
     content {
       frequency   = maintenance_window_node_os.value.frequency
       interval    = maintenance_window_node_os.value.interval
@@ -444,7 +444,7 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   # Microsoft Defender - enables security monitoring and threat protection
   dynamic "microsoft_defender" {
-    for_each = try(var.settings.microsoft_defender, var.kubernetes_cluster != null ? var.kubernetes_cluster.microsoft_defender : null, null) != null ? [try(var.settings.microsoft_defender, var.kubernetes_cluster.microsoft_defender)] : []
+    for_each = try(var.settings.microsoft_defender, null) != null ? [var.settings.microsoft_defender] : []
     content {
       log_analytics_workspace_id = microsoft_defender.value.log_analytics_workspace_id
     }
@@ -452,7 +452,7 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   # Monitor Metrics - configures Prometheus metrics collection
   dynamic "monitor_metrics" {
-    for_each = try(var.settings.monitor_metrics, var.kubernetes_cluster != null ? var.kubernetes_cluster.monitor_metrics : null, null) != null ? [try(var.settings.monitor_metrics, var.kubernetes_cluster.monitor_metrics)] : []
+    for_each = try(var.settings.monitor_metrics, null) != null ? [var.settings.monitor_metrics] : []
     content {
       annotations_allowed = monitor_metrics.value.annotations_allowed
       labels_allowed      = monitor_metrics.value.labels_allowed
@@ -461,7 +461,7 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   # Storage Profile - configures CSI storage drivers
   dynamic "storage_profile" {
-    for_each = try(var.settings.storage_profile, var.kubernetes_cluster != null ? var.kubernetes_cluster.storage_profile : null, null) != null ? [try(var.settings.storage_profile, var.kubernetes_cluster.storage_profile)] : []
+    for_each = try(var.settings.storage_profile, null) != null ? [var.settings.storage_profile] : []
     content {
       blob_driver_enabled         = storage_profile.value.blob_driver_enabled
       disk_driver_enabled         = storage_profile.value.disk_driver_enabled
@@ -472,7 +472,7 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   # Web App Routing - enables managed NGINX ingress controller with DNS integration
   dynamic "web_app_routing" {
-    for_each = try(var.settings.web_app_routing, var.kubernetes_cluster != null ? var.kubernetes_cluster.web_app_routing : null, null) != null ? [try(var.settings.web_app_routing, var.kubernetes_cluster.web_app_routing)] : []
+    for_each = try(var.settings.web_app_routing, null) != null ? [var.settings.web_app_routing] : []
     content {
       dns_zone_ids             = web_app_routing.value.dns_zone_ids
       web_app_routing_identity = web_app_routing.value.web_app_routing_identity
@@ -481,7 +481,7 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   # Workload Autoscaler Profile - enables advanced autoscaling features
   dynamic "workload_autoscaler_profile" {
-    for_each = try(var.settings.workload_autoscaler_profile, var.kubernetes_cluster != null ? var.kubernetes_cluster.workload_autoscaler_profile : null, null) != null ? [try(var.settings.workload_autoscaler_profile, var.kubernetes_cluster.workload_autoscaler_profile)] : []
+    for_each = try(var.settings.workload_autoscaler_profile, null) != null ? [var.settings.workload_autoscaler_profile] : []
     content {
       keda_enabled                    = workload_autoscaler_profile.value.keda_enabled
       vertical_pod_autoscaler_enabled = workload_autoscaler_profile.value.vertical_pod_autoscaler_enabled

@@ -11,26 +11,27 @@ terraform {
 module "name" {
   source          = "../_global/modules/naming"
   key             = var.key
+  settings        = var.settings
   global_settings = var.global_settings
   resource_type   = "azurerm_monitor_diagnostic_setting"
 }
 
 # Create diagnostic settings to send logs and metrics to various destinations for monitoring and compliance
 resource "azurerm_monitor_diagnostic_setting" "this" {
-  name               = try(var.diagnostic_setting.name, module.name.result)
-  target_resource_id = var.diagnostic_setting.target_resource_id
+  name               = try(var.settings.name, module.name.result)
+  target_resource_id = var.settings.target_resource_id
 
   # Destination configuration for diagnostic data
-  log_analytics_workspace_id     = var.diagnostic_setting.log_analytics_workspace_id
-  log_analytics_destination_type = var.diagnostic_setting.log_analytics_destination_type
-  storage_account_id             = var.diagnostic_setting.storage_account_id
-  eventhub_name                  = var.diagnostic_setting.eventhub_name
-  eventhub_authorization_rule_id = var.diagnostic_setting.eventhub_authorization_rule_id
-  partner_solution_id            = var.diagnostic_setting.partner_solution_id
+  log_analytics_workspace_id     = try(var.settings.log_analytics_workspace_id, null)
+  log_analytics_destination_type = try(var.settings.log_analytics_destination_type, null)
+  storage_account_id             = try(var.settings.storage_account_id, null)
+  eventhub_name                  = try(var.settings.eventhub_name, null)
+  eventhub_authorization_rule_id = try(var.settings.eventhub_authorization_rule_id, null)
+  partner_solution_id            = try(var.settings.partner_solution_id, null)
 
   # Configure which logs to collect and their retention policies
   dynamic "enabled_log" {
-    for_each = var.diagnostic_setting.enabled_log != null ? var.diagnostic_setting.enabled_log : []
+    for_each = try(var.settings.enabled_log, [])
     content {
       category       = enabled_log.value.category
       category_group = enabled_log.value.category_group
@@ -48,7 +49,7 @@ resource "azurerm_monitor_diagnostic_setting" "this" {
 
   # Configure which metrics to collect and their retention policies
   dynamic "metric" {
-    for_each = var.diagnostic_setting.metric != null ? var.diagnostic_setting.metric : []
+    for_each = try(var.settings.metric, [])
     content {
       category = metric.value.category
       enabled  = metric.value.enabled

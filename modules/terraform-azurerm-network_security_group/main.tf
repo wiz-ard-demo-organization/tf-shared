@@ -20,22 +20,20 @@ module "name" {
 
 locals {
   resource_group = can(var.settings.resource_group.state_key) ? try(var.remote_states[var.settings.resource_group.state_key].resource_groups[var.settings.resource_group.key], null) : try(var.resource_groups[var.settings.resource_group.key], null)
-  # Handle both settings.security_rules and network_security_group.security_rules formats
-  security_rules = try(var.settings.security_rules, var.network_security_group.security_rules, {})
 }
 
 # Create the Network Security Group resource with configurable security rules for network traffic control
 resource "azurerm_network_security_group" "this" {
-  name                = try(var.settings.name, var.network_security_group.name, module.name.result)
-  resource_group_name = try(var.settings.resource_group_name, local.resource_group.name, var.network_security_group.resource_group_name)
-  location            = try(var.settings.location, var.global_settings.location_name, var.network_security_group.location)
+  name                = try(var.settings.name, module.name.result)
+  resource_group_name = try(var.settings.resource_group_name, local.resource_group.name)
+  location            = try(var.settings.location, var.global_settings.location_name)
 
   tags = var.tags
 }
 
 # Create individual security rules associated with the NSG for granular traffic control
 resource "azurerm_network_security_rule" "this" {
-  for_each = local.security_rules
+  for_each = try(var.settings.security_rules, {})
 
   name                                       = each.value.name
   resource_group_name                        = azurerm_network_security_group.this.resource_group_name
